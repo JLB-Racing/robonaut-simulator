@@ -70,9 +70,9 @@ namespace rsim
                 for (auto &bit : bits)
                 {
                     if (bit == '1')
-                        bitmap[row][col] = true;
+                        bitmap[col][row] = true;
                     else
-                        bitmap[row][col] = false;
+                        bitmap[col][row] = false;
                     col++;
                     if (col == BITMAP_SIZE)
                     {
@@ -102,7 +102,7 @@ namespace rsim
                 {
                     for (int j = 0, k = BITMAP_SIZE - 1; j < k; j++, k--)
                     {
-                        std::swap(rotated[i][j], rotated[i][k]);
+                        std::swap(rotated[j][i], rotated[k][i]);
                     }
                 }
 
@@ -134,7 +134,7 @@ namespace rsim
                 {
                     for (int j = 0, k = BITMAP_SIZE - 1; j < k; j++, k--)
                     {
-                        std::swap(bitmap[i][j], bitmap[i][k]);
+                        std::swap(bitmap[j][i], bitmap[k][i]);
                     }
                 }
             }
@@ -145,7 +145,7 @@ namespace rsim
                 {
                     for (int j = 0, k = BITMAP_SIZE - 1; j < k; j++, k--)
                     {
-                        std::swap(bitmap[j][i], bitmap[k][i]);
+                        std::swap(bitmap[i][j], bitmap[i][k]);
                     }
                 }
             }
@@ -170,20 +170,20 @@ namespace rsim
         class Map
         {
         public:
-            bool data[GRID_HEIGHT * BITMAP_SIZE][GRID_WIDTH * BITMAP_SIZE];
+            bool data[MAP_WIDTH][MAP_HEIGHT];
 
             Map()
             {
-                for (int i = 0; i < GRID_HEIGHT * BITMAP_SIZE; i++)
-                    for (int j = 0; j < GRID_WIDTH * BITMAP_SIZE; j++)
-                        data[i][j] = true;
+                for (unsigned long col = 0; col < MAP_WIDTH; col++)
+                    for (unsigned long row = 0; row < MAP_HEIGHT; row++)
+                        data[col][row] = true;
 
                 build_grid();
 
                 // iterate over grid and fill in data
-                for (int i = 0; i < GRID_HEIGHT; i++)
+                for (int i = 0; i < GRID_WIDTH; i++)
                 {
-                    for (int j = 0; j < GRID_WIDTH; j++)
+                    for (int j = 0; j < GRID_HEIGHT; j++)
                     {
                         for (int k = 0; k < BITMAP_SIZE; k++)
                         {
@@ -215,24 +215,24 @@ namespace rsim
             {
                 auto copy = start;
                 copy.flip_vertical();
-                grid[3][4] = std::move(copy);
+                grid[4][3] = std::move(copy);
 
                 copy = start;
-                copy.flip_vertical();
                 copy.flip_horizontal();
-                grid[3][5] = std::move(copy);
+                copy.flip_vertical();
+                grid[5][3] = std::move(copy);
 
                 copy = turn_line_wide;
                 copy.rotate90();
-                grid[4][5] = std::move(copy);
+                grid[5][4] = std::move(copy);
 
                 copy = line;
-                grid[5][3] = std::move(copy);
+                grid[3][5] = std::move(copy);
 
                 copy = turn_line2_wide;
-                copy.flip_vertical();
                 copy.flip_horizontal();
-                grid[5][4] = std::move(copy);
+                copy.flip_vertical();
+                grid[4][5] = std::move(copy);
 
                 copy = turn_line_wide;
                 copy.rotate90();
@@ -241,128 +241,128 @@ namespace rsim
 
                 copy = turn_line2_wide;
                 copy.flip_vertical();
-                grid[5][6] = std::move(copy);
+                grid[6][5] = std::move(copy);
 
                 copy = turn_line3_wide;
-                copy.flip_vertical();
                 copy.flip_horizontal();
-                grid[5][7] = std::move(copy);
+                copy.flip_vertical();
+                grid[7][5] = std::move(copy);
 
                 copy = turn;
                 copy.flip_vertical();
-                grid[5][8] = std::move(copy);
+                grid[8][5] = std::move(copy);
 
                 copy = turn2;
                 copy.flip_vertical();
                 copy.rotate270();
-                grid[5][9] = std::move(copy);
+                grid[9][5] = std::move(copy);
 
                 copy = turn;
                 copy.flip_vertical();
-                grid[5][10] = std::move(copy);
+                grid[10][5] = std::move(copy);
 
                 copy = line_dotted;
                 copy.flip_vertical();
-                grid[6][3] = std::move(copy);
+                grid[3][6] = std::move(copy);
 
                 copy = turn_line_wide;
                 copy.rotate90();
-                grid[6][4] = std::move(copy);
+                grid[4][6] = std::move(copy);
 
                 copy = turn_line_wide;
                 copy.rotate90();
-                grid[6][5] = std::move(copy);
+                grid[5][6] = std::move(copy);
 
                 copy = turn_line;
                 grid[6][6] = std::move(copy);
 
                 copy = turn_line;
-                copy.flip_horizontal();
-                grid[6][7] = std::move(copy);
-
-                copy = turn_line;
-                grid[6][8] = std::move(copy);
-
-                copy = turn_line;
-                copy.flip_horizontal();
-                grid[6][9] = std::move(copy);
-
-                copy = turn_line2_wide;
-                copy.flip_horizontal();
-                copy.rotate270();
-                grid[6][10] = std::move(copy);
-
-                copy = line_dotted;
-                grid[7][3] = std::move(copy);
-
-                copy = turn_line_wide;
                 copy.rotate90();
-                copy.flip_vertical();
-                grid[7][4] = std::move(copy);
-
-                copy = turn_line_wide;
-                copy.rotate90();
-                copy.flip_vertical();
-                grid[7][5] = std::move(copy);
-
-                copy = turn_line;
-                copy.rotate270();
                 grid[7][6] = std::move(copy);
 
                 copy = turn_line;
-                copy.flip_horizontal();
+                grid[8][6] = std::move(copy);
+
+                copy = turn_line;
+                copy.rotate90();
+                grid[9][6] = std::move(copy);
+
+                copy = turn_line2_wide;
                 copy.flip_vertical();
+                copy.rotate90();
+                grid[10][6] = std::move(copy);
+
+                copy = line_dotted;
+                grid[3][7] = std::move(copy);
+
+                copy = turn_line_wide;
+                copy.flip_vertical();
+                copy.rotate270();
+                grid[4][7] = std::move(copy);
+
+                copy = turn_line_wide;
+                copy.flip_vertical();
+                copy.rotate270();
+                grid[5][7] = std::move(copy);
+
+                copy = turn_line;
+                copy.flip_vertical();
+                grid[6][7] = std::move(copy);
+
+                copy = turn_line;
+                copy.flip_vertical();
+                copy.rotate270();
                 grid[7][7] = std::move(copy);
 
                 copy = turn_line;
-                copy.rotate270();
-                grid[7][8] = std::move(copy);
+                copy.flip_vertical();
+                grid[8][7] = std::move(copy);
 
                 copy = turn_line;
-                copy.flip_horizontal();
                 copy.flip_vertical();
-                grid[7][9] = std::move(copy);
+                copy.rotate270();
+                grid[9][7] = std::move(copy);
 
                 copy = turn_line3_wide;
                 copy.rotate270();
-                grid[7][10] = std::move(copy);
+                grid[10][7] = std::move(copy);
 
                 copy = turn;
                 copy.flip_horizontal();
-                grid[8][4] = std::move(copy);
+                grid[4][8] = std::move(copy);
 
                 copy = turn_line_wide;
                 copy.rotate90();
-                grid[8][5] = std::move(copy);
+                grid[5][8] = std::move(copy);
 
                 copy = turn;
-                grid[8][6] = std::move(copy);
+                grid[6][8] = std::move(copy);
 
                 copy = turn2;
                 copy.rotate90();
-                grid[8][7] = std::move(copy);
+                grid[7][8] = std::move(copy);
 
                 copy = turn_line2_wide;
                 grid[8][8] = std::move(copy);
 
                 copy = turn_line3_wide;
                 copy.flip_horizontal();
-                grid[8][9] = std::move(copy);
+                grid[9][8] = std::move(copy);
 
                 copy = turn;
-                grid[8][10] = std::move(copy);
+                grid[10][8] = std::move(copy);
 
                 copy = turn_line_wide;
+                copy.flip_horizontal();
                 copy.rotate90();
-                copy.flip_vertical();
-                grid[9][5] = std::move(copy);
+                grid[5][9] = std::move(copy);
 
                 copy = start;
-                grid[10][4] = std::move(copy);
+                grid[4][10] = std::move(copy);
 
                 copy = start;
                 copy.flip_horizontal();
-                grid[10][5] = std::move(copy);
+                grid[5][10] = std::move(copy);
             }
         };
 

@@ -10,16 +10,18 @@
 
 int main(int, char **)
 {
-    double start_x = 660.0;
-    double start_y = 320.0;
-    double start_orientation = M_PI;
+    double start_x = 320.0;
+    double start_y = 660.0;
+    double start_orientation = -M_PI / 2.0;
 
     rsim::env::Car car = rsim::env::Car{start_x, start_y, start_orientation};
     rsim::env::Map map = rsim::env::Map{};
     jlb::Controller controller;
 
-    sf::RenderWindow window(sf::VideoMode(rsim::env::MAP_HEIGHT, rsim::env::MAP_WIDTH), "RobonAUT Simulator");
+    sf::RenderWindow window(sf::VideoMode(rsim::env::MAP_WIDTH, rsim::env::MAP_HEIGHT), "RobonAUT Simulator");
     window.setPosition(sf::Vector2i(1250, 250));
+    // set framerate
+    window.setFramerateLimit(200);
 
     sf::Texture car_texture;
     if (!car_texture.loadFromFile("assets/car.png"))
@@ -46,9 +48,9 @@ int main(int, char **)
         window.clear(sf::Color::White);
 
         // iterate through map
-        for (unsigned long row = 0; row < rsim::env::MAP_HEIGHT; row++)
+        for (unsigned long col = 0; col < rsim::env::MAP_WIDTH; col++)
         {
-            for (unsigned long col = 0; col < rsim::env::MAP_WIDTH; col++)
+            for (unsigned long row = 0; row < rsim::env::MAP_HEIGHT; row++)
             {
                 if (!map.data[row][col])
                 {
