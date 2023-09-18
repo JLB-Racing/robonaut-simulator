@@ -1,3 +1,6 @@
 [submodule "include/JLB"]
 	path = include/JLB
 	url = git@github.com:JLB-Racing/robonaut-logic.git
+[submodule "include/SGL"]
+	path = include/SGL
+	url = git@github.com:zalandemeter12/simple-graph-library.git
