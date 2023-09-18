@@ -19,7 +19,7 @@ int main(int, char **)
     jlb::Controller controller;
 
     sf::RenderWindow window(sf::VideoMode(rsim::env::MAP_WIDTH, rsim::env::MAP_HEIGHT), "RobonAUT Simulator");
-    window.setPosition(sf::Vector2i(1250, 250));
+    window.setPosition(sf::Vector2i(950, 150));
     // set framerate
     window.setFramerateLimit(200);
 
@@ -46,6 +46,31 @@ int main(int, char **)
         double target_angle = controller.lateral_control(car.state, car.line_sensor.detection);
         car.update(target_angle, 10.0);
         window.clear(sf::Color::White);
+
+        for (auto gate : map.gates)
+        {
+            // print a circle for each gate
+            sf::CircleShape circle(8);
+            // circle.setFillColor(sf::Color::Red);
+            switch (gate.state)
+            {
+            case rsim::env::Gate::State::UNMAPPED:
+                circle.setFillColor(sf::Color(200, 200, 200));
+                break;
+            case rsim::env::Gate::State::STOLEN_ONCE:
+                circle.setFillColor(sf::Color::Yellow);
+                break;
+            case rsim::env::Gate::State::STOLEN_TWICE:
+                circle.setFillColor(sf::Color::Red);
+                break;
+            case rsim::env::Gate::State::MAPPED:
+                circle.setFillColor(sf::Color::Green);
+                break;
+            }
+
+            circle.setPosition(gate.x - 8, gate.y - 8);
+            window.draw(circle);
+        }
 
         // iterate through map
         for (unsigned long col = 0; col < rsim::env::MAP_WIDTH; col++)

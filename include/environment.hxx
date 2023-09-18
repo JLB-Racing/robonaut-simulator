@@ -167,10 +167,29 @@ namespace rsim
             }
         };
 
+        class Gate
+        {
+        public:
+            enum class State
+            {
+                UNMAPPED,
+                STOLEN_ONCE,
+                STOLEN_TWICE,
+                MAPPED,
+            };
+
+            State state = State::UNMAPPED;
+            double x;
+            double y;
+
+            Gate(double x_, double y_) : x{x_}, y{y_} {}
+        };
+
         class Map
         {
         public:
             bool data[MAP_WIDTH][MAP_HEIGHT];
+            std::vector<Gate> gates;
 
             Map()
             {
@@ -179,6 +198,7 @@ namespace rsim
                         data[col][row] = true;
 
                 build_grid();
+                build_gates();
 
                 // iterate over grid and fill in data
                 for (int i = 0; i < GRID_WIDTH; i++)
@@ -363,6 +383,13 @@ namespace rsim
                 copy = start;
                 copy.flip_horizontal();
                 grid[5][10] = std::move(copy);
+            }
+
+            void build_gates()
+            {
+                gates.push_back(Gate(321.0, 321.0));
+                gates.push_back(Gate(385.0, 321.0));
+                gates.push_back(Gate(512.0, 321.0));
             }
         };
 
