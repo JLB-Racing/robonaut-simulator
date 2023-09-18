@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <bitset>
+#include <chrono>
 
 #include "vehicle_model.hxx"
 #include "sensor_model.hxx"
@@ -17,7 +18,7 @@ namespace rsim
     namespace env
     {
         static constexpr int BITMAP_SIZE = 64;
-        static constexpr int GRID_WIDTH = 15;
+        static constexpr int GRID_WIDTH = 20;
         static constexpr int GRID_HEIGHT = 15;
         static constexpr int MAP_WIDTH = GRID_WIDTH * BITMAP_SIZE;
         static constexpr int MAP_HEIGHT = GRID_HEIGHT * BITMAP_SIZE;
@@ -182,6 +183,9 @@ namespace rsim
             double x;
             double y;
 
+            std::chrono::steady_clock::time_point last_seen;
+            std::chrono::steady_clock::time_point last_stolen;
+
             Gate(double x_, double y_) : x{x_}, y{y_} {}
         };
 
@@ -200,24 +204,16 @@ namespace rsim
                 build_grid();
                 build_gates();
 
-                // iterate over grid and fill in data
-                for (int i = 0; i < GRID_WIDTH; i++)
-                {
-                    for (int j = 0; j < GRID_HEIGHT; j++)
-                    {
-                        for (int k = 0; k < BITMAP_SIZE; k++)
-                        {
-                            for (int l = 0; l < BITMAP_SIZE; l++)
-                            {
-                                data[i * BITMAP_SIZE + k][j * BITMAP_SIZE + l] = grid[i][j].bitmap[k][l];
-                            }
-                        }
-                    }
-                }
+                // iterate over grid and fill in data indexing is [col][row]
+                for (int gcol = 0; gcol < GRID_WIDTH; gcol++)
+                    for (int grow = 0; grow < GRID_HEIGHT; grow++)
+                        for (int bcol = 0; bcol < BITMAP_SIZE; bcol++)
+                            for (int brow = 0; brow < BITMAP_SIZE; brow++)
+                                data[gcol * BITMAP_SIZE + bcol][grow * BITMAP_SIZE + brow] = grid[gcol][grow].bitmap[bcol][brow];
             }
 
         private:
-            Bitmap grid[GRID_HEIGHT][GRID_WIDTH] = {{rsim::env::Bitmap{}}};
+            Bitmap grid[GRID_WIDTH][GRID_HEIGHT] = {{rsim::env::Bitmap{}}};
             Bitmap start = Bitmap("assets/start.bmp");
             Bitmap line = Bitmap("assets/line.bmp");
             Bitmap line_dotted = Bitmap("assets/line-dotted.bmp");
@@ -387,9 +383,33 @@ namespace rsim
 
             void build_gates()
             {
-                gates.push_back(Gate(321.0, 321.0));
-                gates.push_back(Gate(385.0, 321.0));
-                gates.push_back(Gate(512.0, 321.0));
+                gates.push_back(Gate(320.0, 320.0));
+                gates.push_back(Gate(384.0, 320.0));
+                gates.push_back(Gate(512.0, 320.0));
+                gates.push_back(Gate(640.0, 320.0));
+
+                gates.push_back(Gate(256.0, 384.0));
+                gates.push_back(Gate(320.0, 384.0));
+                gates.push_back(Gate(448.0, 384.0));
+                gates.push_back(Gate(576.0, 384.0));
+                gates.push_back(Gate(704.0, 384.0));
+
+                gates.push_back(Gate(320.0, 448.0));
+                gates.push_back(Gate(384.0, 448.0));
+                gates.push_back(Gate(512.0, 448.0));
+                gates.push_back(Gate(640.0, 448.0));
+
+                gates.push_back(Gate(256.0, 512.0));
+                gates.push_back(Gate(320.0, 512.0));
+                gates.push_back(Gate(448.0, 512.0));
+                gates.push_back(Gate(576.0, 512.0));
+                gates.push_back(Gate(704.0, 512.0));
+
+                gates.push_back(Gate(384.0, 576.0));
+                gates.push_back(Gate(512.0, 576.0));
+                gates.push_back(Gate(640.0, 576.0));
+
+                gates.push_back(Gate(320.0, 640.0));
             }
         };
 
