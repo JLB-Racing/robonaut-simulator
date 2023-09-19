@@ -217,9 +217,13 @@ namespace rsim
             Bitmap start = Bitmap("assets/start.bmp");
             Bitmap line = Bitmap("assets/line.bmp");
             Bitmap line_dotted = Bitmap("assets/line-dotted.bmp");
+            Bitmap line_triple = Bitmap("assets/line-triple.bmp");
+            Bitmap line_triple_half = Bitmap("assets/line-triple-half.bmp");
+            Bitmap line_triple_half_dotted = Bitmap("assets/line-triple-half-dotted.bmp");
             Bitmap turn = Bitmap("assets/turn.bmp");
             Bitmap turn2 = Bitmap("assets/turn-2.bmp");
             Bitmap turn3 = Bitmap("assets/turn-3.bmp");
+            Bitmap turn_half = Bitmap("assets/turn-half.bmp");
             Bitmap turn_line = Bitmap("assets/turn-line.bmp");
             Bitmap turn_line2 = Bitmap("assets/turn-line-2.bmp");
             Bitmap turn_line3 = Bitmap("assets/turn-line-3.bmp");
@@ -343,6 +347,10 @@ namespace rsim
                 copy.rotate270();
                 grid[10][7] = std::move(copy);
 
+                copy = line_triple_half;
+                copy.flip_vertical();
+                grid[3][8] = std::move(copy);
+
                 copy = turn;
                 copy.flip_horizontal();
                 grid[4][8] = std::move(copy);
@@ -368,6 +376,9 @@ namespace rsim
                 copy = turn;
                 grid[10][8] = std::move(copy);
 
+                copy = line_triple;
+                grid[3][9] = std::move(copy);
+
                 copy = turn_line_wide;
                 copy.flip_horizontal();
                 copy.rotate90();
@@ -379,6 +390,71 @@ namespace rsim
                 copy = start;
                 copy.flip_horizontal();
                 grid[5][10] = std::move(copy);
+
+                copy = line_triple_half;
+                grid[3][10] = std::move(copy);
+
+                copy = turn_half;
+                copy.flip_horizontal();
+                grid[3][11] = std::move(copy);
+
+                copy = line_triple_half_dotted;
+                copy.rotate90();
+                grid[4][11] = std::move(copy);
+
+                copy = line;
+                copy.rotate90();
+                grid[5][11] = std::move(copy);
+
+                copy = line;
+                copy.rotate90();
+                grid[6][11] = std::move(copy);
+
+                copy = line;
+                copy.rotate90();
+                grid[7][11] = std::move(copy);
+
+                copy = line;
+                copy.rotate90();
+                grid[8][11] = std::move(copy);
+
+                copy = line;
+                copy.rotate90();
+                grid[9][11] = std::move(copy);
+
+                copy = line_triple_half;
+                copy.rotate90();
+                grid[10][11] = std::move(copy);
+
+                copy = line_triple;
+                copy.rotate90();
+                grid[11][11] = std::move(copy);
+
+                copy = line_triple_half;
+                copy.rotate90();
+                copy.flip_horizontal();
+                grid[12][11] = std::move(copy);
+
+                copy = turn_half;
+                copy.flip_vertical();
+                grid[13][11] = std::move(copy);
+
+                copy = line;
+                grid[13][12] = std::move(copy);
+
+                copy = line_triple_half_dotted;
+                grid[15][12] = std::move(copy);
+
+                copy = turn_half;
+                copy.flip_horizontal();
+                grid[13][13] = std::move(copy);
+
+                copy = line;
+                copy.rotate90();
+                grid[14][13] = std::move(copy);
+
+                copy = turn_half;
+                grid[15][13] = std::move(copy);
             }
 
             void build_gates()

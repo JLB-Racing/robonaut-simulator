@@ -19,6 +19,13 @@ int main(int, char **)
     rsim::Simulation simulation{start_x, start_y, start_orientation, opp_start_x, opp_start_y, opp_start_orientation};
     jlb::Controller controller;
     jlb::Controller opp_controller;
+    jlb::Controller fast_controller;
+
+    double fast_start_x = 224.0;
+    double fast_start_y = 384.0;
+    double fast_start_orientation = M_PI / 2.0;
+
+    rsim::env::Car fast_car{fast_start_x, fast_start_y, fast_start_orientation};
 
     sf::RenderWindow window(sf::VideoMode(rsim::env::MAP_WIDTH, rsim::env::MAP_HEIGHT), "RobonAUT Simulator");
     window.setPosition(sf::Vector2i(950, 150));
@@ -58,7 +65,17 @@ int main(int, char **)
         double target_speed = controller.longitudinal_control(jlb::Controller::Direction::RIGHT);
         double opp_target_angle = opp_controller.lateral_control(simulation.opp, jlb::Controller::Direction::LEFT);
         double opp_target_speed = opp_controller.longitudinal_control(jlb::Controller::Direction::LEFT);
+        double fast_target_angle = fast_controller.lateral_control(fast_car, jlb::Controller::Direction::LEFT);
+        // double fast_target_speed = fast_controller.longitudinal_control(jlb::Controller::Direction::STRAIGHT);
         simulation.update(target_angle, target_speed, opp_target_angle, opp_target_speed);
+        fast_car.detect(simulation.map.data, rsim::env::MAP_WIDTH, rsim::env::MAP_HEIGHT);
+        fast_car.update(fast_target_angle, 25.0);
+        // print fast detection
+        for (int i = 0; i < rsim::smodel::SENSOR_WIDTH; i++)
+        {
+            std::cout << fast_car.line_sensor.detection[i];
+        }
+        std::cout << std::endl;
 
         window.clear(sf::Color::White);
 
@@ -92,10 +109,10 @@ int main(int, char **)
         {
             for (unsigned long row = 0; row < rsim::env::MAP_HEIGHT; row++)
             {
-                if (!simulation.map.data[row][col])
+                if (!simulation.map.data[col][row])
                 {
                     sf::RectangleShape rectangle(sf::Vector2f(1, 1));
-                    rectangle.setPosition(row, col);
+                    rectangle.setPosition(col, row);
                     rectangle.setFillColor(sf::Color::Black);
                     window.draw(rectangle);
                 }
@@ -104,6 +121,10 @@ int main(int, char **)
 
         car_sprite.setPosition(simulation.car.state.x, simulation.car.state.y);
         car_sprite.setRotation(simulation.car.state.orientation * 180 / M_PI + 90);
+        window.draw(car_sprite);
+
+        car_sprite.setPosition(fast_car.state.x, fast_car.state.y);
+        car_sprite.setRotation(fast_car.state.orientation * 180 / M_PI + 90);
         window.draw(car_sprite);
 
         opp_sprite.setPosition(simulation.opp.state.x, simulation.opp.state.y);
