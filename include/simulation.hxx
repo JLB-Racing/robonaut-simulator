@@ -18,15 +18,14 @@ namespace rsim
         {
         }
 
-        void update(const double wheel_angle, const double velocity, [[maybe_unused]] const double opp_wheel_angle, [[maybe_unused]] double opp_velocity)
+        void update(const double wheel_angle, const double velocity, const double opp_wheel_angle, double opp_velocity)
         {
-            car.detect(map.data, rsim::env::MAP_WIDTH, rsim::env::MAP_HEIGHT);
+            car.detect(map.data);
             car.update(wheel_angle, velocity);
 
-            opp.detect(map.data, rsim::env::MAP_WIDTH, rsim::env::MAP_HEIGHT);
+            opp.detect(map.data);
             opp.update(opp_wheel_angle, opp_velocity);
 
-            // iterate over all gates of the map and check if the car is inside an 8 pixel radius of the gate
             for (auto &gate : map.gates)
             {
                 if (std::sqrt(std::pow(gate.x - car.state.x, 2) + std::pow(gate.y - car.state.y, 2)) < 8)

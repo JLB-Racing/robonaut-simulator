@@ -9,7 +9,7 @@ namespace rsim
     {
         static constexpr double DELTA_T = 0.1;
         static constexpr double MAX_WHEEL_ANGLE = 1.0;
-        static constexpr double MAX_VELOCITY = 300.0;
+        static constexpr double MAX_VELOCITY = 50.0;
         static constexpr double WHEELBASE = 16.0;
 
         struct State

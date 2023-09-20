@@ -28,7 +28,8 @@ namespace rsim
                 state = state_;
             }
 
-            void detect(bool map[][1024], unsigned long map_width, unsigned long map_height)
+            template <size_t cols, size_t rows>
+            void detect(bool (&map)[cols][rows])
             {
                 // Reset detection results
                 for (int i = 0; i < SENSOR_WIDTH; i++)
@@ -42,7 +43,7 @@ namespace rsim
                     unsigned long y = state.y + (i - SENSOR_WIDTH / 2) * std::sin(state.orientation + M_PI / 2);
 
                     // Check if the point is within the map bounds
-                    if (x >= 0 && x < map_width && y >= 0 && y < map_height)
+                    if (x >= 0 && x < cols && y >= 0 && y < rows)
                     {
                         detection[i] = map[x][y];
                     }

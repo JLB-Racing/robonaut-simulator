@@ -629,9 +629,10 @@ namespace rsim
                 line_sensor.update(state);
             }
 
-            void detect(bool map[][1024], unsigned long map_width, unsigned long map_height)
+            template <size_t cols, size_t rows>
+            void detect(bool (&map)[cols][rows])
             {
-                line_sensor.detect(map, map_width, map_height);
+                line_sensor.detect(map);
             }
 
         private:
