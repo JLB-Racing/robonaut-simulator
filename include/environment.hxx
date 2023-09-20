@@ -18,7 +18,7 @@ namespace rsim
     namespace env
     {
         static constexpr int BITMAP_SIZE = 64;
-        static constexpr int GRID_WIDTH = 18;
+        static constexpr int GRID_WIDTH = 17;
         static constexpr int GRID_HEIGHT = 16;
         static constexpr int MAP_WIDTH = GRID_WIDTH * BITMAP_SIZE;
         static constexpr int MAP_HEIGHT = GRID_HEIGHT * BITMAP_SIZE;
@@ -214,16 +214,20 @@ namespace rsim
 
         private:
             Bitmap grid[GRID_WIDTH][GRID_HEIGHT] = {{rsim::env::Bitmap{}}};
+            Bitmap balancer = Bitmap("assets/balancer.bmp");
             Bitmap start = Bitmap("assets/start.bmp");
             Bitmap line = Bitmap("assets/line.bmp");
             Bitmap line_dotted = Bitmap("assets/line-dotted.bmp");
+            Bitmap line_edge = Bitmap("assets/line-edge.bmp");
             Bitmap line_triple = Bitmap("assets/line-triple.bmp");
             Bitmap line_triple_half = Bitmap("assets/line-triple-half.bmp");
             Bitmap line_triple_half_dotted = Bitmap("assets/line-triple-half-dotted.bmp");
             Bitmap turn = Bitmap("assets/turn.bmp");
             Bitmap turn2 = Bitmap("assets/turn-2.bmp");
             Bitmap turn3 = Bitmap("assets/turn-3.bmp");
+            Bitmap turn_t = Bitmap("assets/turn-t.bmp");
             Bitmap turn_half = Bitmap("assets/turn-half.bmp");
+            Bitmap turn_half_full = Bitmap("assets/turn-half-full.bmp");
             Bitmap turn_line = Bitmap("assets/turn-line.bmp");
             Bitmap turn_line2 = Bitmap("assets/turn-line-2.bmp");
             Bitmap turn_line3 = Bitmap("assets/turn-line-3.bmp");
@@ -305,13 +309,13 @@ namespace rsim
                 copy = line_triple;
                 grid[15][3] = std::move(copy);
 
-                copy = start;
-                copy.flip_vertical();
-                grid[4][4] = std::move(copy);
-
                 copy = line_triple_half_dotted;
                 copy.flip_vertical();
                 grid[3][4] = std::move(copy);
+
+                copy = start;
+                copy.flip_vertical();
+                grid[4][4] = std::move(copy);
 
                 copy = start;
                 copy.flip_horizontal();
@@ -331,7 +335,15 @@ namespace rsim
                 copy = line;
                 grid[15][5] = std::move(copy);
 
-                copy = line;
+                copy = turn_half_full;
+                copy.rotate180();
+                grid[1][6] = std::move(copy);
+
+                copy = line_edge;
+                copy.rotate90();
+                grid[2][6] = std::move(copy);
+
+                copy = turn_t;
                 grid[3][6] = std::move(copy);
 
                 copy = turn_line2_wide;
@@ -369,6 +381,9 @@ namespace rsim
                 copy = line;
                 grid[15][6] = std::move(copy);
 
+                copy = balancer;
+                grid[1][7] = std::move(copy);
+
                 copy = line_dotted;
                 copy.flip_vertical();
                 grid[3][7] = std::move(copy);
@@ -402,6 +417,9 @@ namespace rsim
 
                 copy = line;
                 grid[15][7] = std::move(copy);
+
+                copy = balancer;
+                grid[1][8] = std::move(copy);
 
                 copy = line_dotted;
                 grid[3][8] = std::move(copy);
