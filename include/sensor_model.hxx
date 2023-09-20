@@ -28,7 +28,7 @@ namespace rsim
                 state = state_;
             }
 
-            void detect(bool map[][960], unsigned long map_width, unsigned long map_height)
+            void detect(bool map[][1024], unsigned long map_width, unsigned long map_height)
             {
                 // Reset detection results
                 for (int i = 0; i < SENSOR_WIDTH; i++)
