@@ -583,23 +583,23 @@ namespace rsim
 
             void build_gates()
             {
-                gates.push_back(Gate(320.0, 384.0));
+                // gates.push_back(Gate(320.0, 384.0));
                 gates.push_back(Gate(384.0, 384.0));
                 gates.push_back(Gate(512.0, 384.0));
                 gates.push_back(Gate(640.0, 384.0));
 
-                gates.push_back(Gate(256.0, 448.0));
+                // gates.push_back(Gate(256.0, 448.0));
                 gates.push_back(Gate(320.0, 448.0));
                 gates.push_back(Gate(448.0, 448.0));
                 gates.push_back(Gate(576.0, 448.0));
                 gates.push_back(Gate(704.0, 448.0));
 
-                gates.push_back(Gate(320.0, 512.0));
+                // gates.push_back(Gate(320.0, 512.0));
                 gates.push_back(Gate(384.0, 512.0));
                 gates.push_back(Gate(512.0, 512.0));
                 gates.push_back(Gate(640.0, 512.0));
 
-                gates.push_back(Gate(256.0, 576.0));
+                // gates.push_back(Gate(256.0, 576.0));
                 gates.push_back(Gate(320.0, 576.0));
                 gates.push_back(Gate(448.0, 576.0));
                 gates.push_back(Gate(576.0, 576.0));

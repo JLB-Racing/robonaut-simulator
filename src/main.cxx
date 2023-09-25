@@ -8,19 +8,10 @@
 
 int main(int, char **)
 {
-    double start_x = 320.0;
-    double start_y = 724.0;
-    double start_orientation = -M_PI / 2.0;
+    rsim::Simulation simulation;
 
-    double opp_start_x = 320.0;
-    double opp_start_y = 300.0;
-    double opp_start_orientation = M_PI / 2.0;
-
-    rsim::Simulation simulation{start_x, start_y, start_orientation, opp_start_x, opp_start_y, opp_start_orientation};
     jlb::Controller controller;
     controller.direction = jlb::Direction::RIGHT;
-    jlb::Controller opp_controller;
-    opp_controller.direction = jlb::Direction::LEFT;
 
     sf::RenderWindow window(sf::VideoMode(rsim::env::MAP_WIDTH, rsim::env::MAP_HEIGHT), "RobonAUT Simulator");
     window.setPosition(sf::Vector2i(500, 50));
@@ -36,15 +27,15 @@ int main(int, char **)
     car_sprite.setTexture(car_texture);
     car_sprite.setOrigin(8.0f, 8.0f);
 
-    sf::Texture opp_texture;
-    if (!opp_texture.loadFromFile("assets/opp.png"))
+    sf::Texture pirate_texture;
+    if (!pirate_texture.loadFromFile("assets/pirate.png"))
     {
-        std::cout << "Error loading assets/opp.png" << std::endl;
+        std::cout << "Error loading assets/pirate.png" << std::endl;
         return 1;
     }
-    sf::Sprite opp_sprite;
-    opp_sprite.setTexture(opp_texture);
-    opp_sprite.setOrigin(8.0f, 8.0f);
+    sf::Sprite pirate_sprite;
+    pirate_sprite.setTexture(pirate_texture);
+    pirate_sprite.setOrigin(8.0f, 8.0f);
 
     while (window.isOpen())
     {
@@ -56,8 +47,7 @@ int main(int, char **)
         }
 
         controller.update(simulation.car.line_sensor.detection);
-        opp_controller.update(simulation.opp.line_sensor.detection);
-        simulation.update(controller.target_angle, controller.target_speed, opp_controller.target_angle, opp_controller.target_speed);
+        simulation.update(controller.target_angle, controller.target_speed);
 
         window.clear(sf::Color::White);
 
@@ -105,9 +95,9 @@ int main(int, char **)
         car_sprite.setRotation(simulation.car.state.orientation * 180 / M_PI + 90);
         window.draw(car_sprite);
 
-        opp_sprite.setPosition(simulation.opp.state.x, simulation.opp.state.y);
-        opp_sprite.setRotation(simulation.opp.state.orientation * 180 / M_PI + 90);
-        window.draw(opp_sprite);
+        pirate_sprite.setPosition(simulation.pirate.state.x, simulation.pirate.state.y);
+        pirate_sprite.setRotation(simulation.pirate.state.orientation * 180 / M_PI + 90);
+        window.draw(pirate_sprite);
 
         window.display();
     }

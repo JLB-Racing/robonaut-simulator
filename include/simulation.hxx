@@ -2,39 +2,47 @@
 #define SIMULATION_HXX
 
 #include "environment.hxx"
+#include "pirate_model.hxx"
 
 namespace rsim
 {
+    double start_x = 320.0;
+    double start_y = 724.0;
+    double start_orientation = -M_PI / 2.0;
+
+    double pirate_start_x = 320.0;
+    double pirate_start_y = 300.0;
+    double pirate_start_orientation = M_PI / 2.0;
+
     class Simulation
     {
     public:
-        rsim::env::Car car;
-        rsim::env::Car opp;
-        rsim::env::Map map;
+        env::Car car;
+        env::Car pirate;
+        env::Map map;
+
+        logic::PirateController pirate_controller;
 
         int collected_points = 0;
 
-        Simulation(const double start_x, const double start_y, const double start_orientation, const double opp_start_x, const double opp_start_y, const double opp_start_orientation) : car{start_x, start_y, start_orientation}, opp{opp_start_x, opp_start_y, opp_start_orientation}
+        Simulation() : car{start_x, start_y, start_orientation}, pirate{pirate_start_x, pirate_start_y, pirate_start_orientation}
         {
         }
 
-        void update(const double wheel_angle, const double velocity, const double opp_wheel_angle, double opp_velocity)
+        void update(const double target_angle, const double target_speed)
         {
-            car.detect(map.data);
-            car.update(wheel_angle, velocity);
-
-            opp.detect(map.data);
-            opp.update(opp_wheel_angle, opp_velocity);
-
+            bool car_under_gate = false;
+            bool pirate_under_gate = false;
             for (auto &gate : map.gates)
             {
                 if (std::sqrt(std::pow(gate.x - car.state.x, 2) + std::pow(gate.y - car.state.y, 2)) < 8)
                 {
-                    for (unsigned long i = 0; i < rsim::smodel::SENSOR_WIDTH; i++)
+                    car_under_gate = true;
+                    for (unsigned long i = 0; i < smodel::SENSOR_WIDTH; i++)
                     {
                         // 1111010110101111 gate signature
-                        if (i == rsim::smodel::SENSOR_WIDTH / 2 + 1 || i == rsim::smodel::SENSOR_WIDTH / 2 - 1 - 1 ||
-                            i == rsim::smodel::SENSOR_WIDTH / 2 + 3 || i == rsim::smodel::SENSOR_WIDTH / 2 - 1 - 3)
+                        if (i == smodel::SENSOR_WIDTH / 2 + 1 || i == smodel::SENSOR_WIDTH / 2 - 1 - 1 ||
+                            i == smodel::SENSOR_WIDTH / 2 + 3 || i == smodel::SENSOR_WIDTH / 2 - 1 - 3)
                         {
                             car.line_sensor.detection[i] = false;
                         }
@@ -47,19 +55,19 @@ namespace rsim
                     {
                         switch (gate.state)
                         {
-                        case rsim::env::Gate::State::UNMAPPED:
-                            gate.state = rsim::env::Gate::State::MAPPED;
+                        case env::Gate::State::UNMAPPED:
+                            gate.state = env::Gate::State::MAPPED;
                             collected_points += 2;
                             break;
-                        case rsim::env::Gate::State::STOLEN_ONCE:
-                            gate.state = rsim::env::Gate::State::MAPPED;
+                        case env::Gate::State::STOLEN_ONCE:
+                            gate.state = env::Gate::State::MAPPED;
                             collected_points += 1;
                             break;
-                        case rsim::env::Gate::State::STOLEN_TWICE:
-                            gate.state = rsim::env::Gate::State::MAPPED;
+                        case env::Gate::State::STOLEN_TWICE:
+                            gate.state = env::Gate::State::MAPPED;
                             break;
 
-                        case rsim::env::Gate::State::MAPPED:
+                        case env::Gate::State::MAPPED:
                             break;
 
                         default:
@@ -69,38 +77,26 @@ namespace rsim
                     gate.last_seen = std::chrono::steady_clock::now();
                 }
 
-                if (std::sqrt(std::pow(gate.x - opp.state.x, 2) + std::pow(gate.y - opp.state.y, 2)) < 8)
+                if (std::sqrt(std::pow(gate.x - pirate.state.x, 2) + std::pow(gate.y - pirate.state.y, 2)) < 8)
                 {
-                    for (unsigned long i = 0; i < rsim::smodel::SENSOR_WIDTH; i++)
-                    {
-                        // 1111010110101111 gate signature
-                        // if (i == rsim::smodel::SENSOR_WIDTH / 2 + 1 || i == rsim::smodel::SENSOR_WIDTH / 2 - 1 - 1 ||
-                        //     i == rsim::smodel::SENSOR_WIDTH / 2 + 3 || i == rsim::smodel::SENSOR_WIDTH / 2 - 1 - 3)
-                        // {
-                        //     opp.line_sensor.detection[i] = false;
-                        // }
-                        // else
-                        // {
-                        //     opp.line_sensor.detection[i] = true;
-                        // }
-                    }
+                    pirate_under_gate = true;
                     if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - gate.last_stolen).count() > 2)
                     {
                         switch (gate.state)
                         {
-                        case rsim::env::Gate::State::UNMAPPED:
-                            gate.state = rsim::env::Gate::State::STOLEN_ONCE;
+                        case env::Gate::State::UNMAPPED:
+                            gate.state = env::Gate::State::STOLEN_ONCE;
                             collected_points += 2;
                             break;
-                        case rsim::env::Gate::State::STOLEN_ONCE:
-                            gate.state = rsim::env::Gate::State::STOLEN_TWICE;
+                        case env::Gate::State::STOLEN_ONCE:
+                            gate.state = env::Gate::State::STOLEN_TWICE;
                             collected_points += 1;
                             break;
-                        case rsim::env::Gate::State::STOLEN_TWICE:
-                            gate.state = rsim::env::Gate::State::STOLEN_TWICE;
+                        case env::Gate::State::STOLEN_TWICE:
+                            gate.state = env::Gate::State::STOLEN_TWICE;
                             break;
 
-                        case rsim::env::Gate::State::MAPPED:
+                        case env::Gate::State::MAPPED:
                             break;
 
                         default:
@@ -110,6 +106,13 @@ namespace rsim
                     gate.last_stolen = std::chrono::steady_clock::now();
                 }
             }
+
+            car.detect(map.data);
+            car.update(target_angle, target_speed);
+
+            pirate.detect(map.data);
+            pirate_controller.update(pirate.line_sensor.detection, pirate_under_gate);
+            pirate.update(pirate_controller.target_angle, pirate_controller.target_speed);
         }
 
     private:

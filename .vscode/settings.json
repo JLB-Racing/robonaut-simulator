@@ -64,5 +64,6 @@
         "typeinfo": "cpp",
         "codecvt": "cpp",
         "numbers": "cpp"
-    }
+    },
+    "ros.distro": "galactic"
 }
