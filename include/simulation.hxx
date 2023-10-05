@@ -6,13 +6,13 @@
 
 namespace rsim
 {
-    double start_x = 320.0;
-    double start_y = 724.0;
-    double start_orientation = -M_PI / 2.0;
+    float start_x = 320.0f;
+    float start_y = 724.0f;
+    float start_orientation = -M_PI / 2.0f;
 
-    double pirate_start_x = 320.0;
-    double pirate_start_y = 300.0;
-    double pirate_start_orientation = M_PI / 2.0;
+    float pirate_start_x = 320.0f;
+    float pirate_start_y = 300.0f;
+    float pirate_start_orientation = M_PI / 2.0f;
 
     class Simulation
     {
@@ -29,13 +29,13 @@ namespace rsim
         {
         }
 
-        void update(const double target_angle, const double target_speed)
+        void update(const float target_angle, const float target_speed)
         {
             bool car_under_gate = false;
             bool pirate_under_gate = false;
             for (auto &gate : map.gates)
             {
-                if (std::sqrt(std::pow(gate.x - car.state.x, 2) + std::pow(gate.y - car.state.y, 2)) < 8)
+                if (std::sqrt(std::pow(gate.x - car.state.x, 2) + std::pow(gate.y - car.state.y, 2)) < 8.0f)
                 {
                     car_under_gate = true;
                     for (unsigned long i = 0; i < smodel::SENSOR_WIDTH; i++)
@@ -77,7 +77,7 @@ namespace rsim
                     gate.last_seen = std::chrono::steady_clock::now();
                 }
 
-                if (std::sqrt(std::pow(gate.x - pirate.state.x, 2) + std::pow(gate.y - pirate.state.y, 2)) < 8)
+                if (std::sqrt(std::pow(gate.x - pirate.state.x, 2) + std::pow(gate.y - pirate.state.y, 2)) < 8.0f)
                 {
                     pirate_under_gate = true;
                     if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - gate.last_stolen).count() > 2)

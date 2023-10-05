@@ -2,48 +2,77 @@
 #define VEHICLE_MODEL_HXX
 
 #include <cmath>
+#include <random>
 
 namespace rsim
 {
     namespace vmodel
     {
-        static constexpr double DELTA_T = 0.1;
-        static constexpr double MAX_WHEEL_ANGLE = 1.0;
-        static constexpr double MAX_VELOCITY = 50.0;
-        static constexpr double WHEELBASE = 16.0;
+        static constexpr float MAX_WHEEL_ANGLE = 1.0f;
+        static constexpr float MAX_VELOCITY = 500.0f;
+        static constexpr float WHEELBASE = 16.0f;
 
-        struct State
+        static constexpr float WHEEL_DIAMETER = 1.0f;
+        static constexpr float GEAR_RATIO_MOTOR_TO_WHEEL = static_cast<float>(3 / 2) * 1.0f;
+
+        static constexpr float YAW_RATE_NOISE = 0.2f;
+        static constexpr float MOTOR_RPM_NOISE = 20.0f;
+
+        class State
         {
-            double x;
-            double y;
-            double orientation;
-            double velocity = 0.0;
-            double angular_velocity = 0.0;
-            double wheel_angle = 0.0;
+        public:
+            float x = 0.0f;
+            float y = 0.0f;
+            float orientation = 0.0f;
+            float velocity = 0.0f;
+            float angular_velocity = 0.0f;
+            float wheel_angle = 0.0f;
+            float wheel_rpm = 0.0f;
+            float motor_rpm = 0.0f;
 
-            State(double x_, double y_, double orientation_)
-                : x(x_), y(y_), orientation(orientation_) {}
+            State(float x_, float y_, float orientation_)
+                : x(x_), y(y_), orientation(orientation_)
+            {
+            }
 
-            void update(double wheel_angle_in, double velocity_in)
+            void update(const float wheel_angle_in, const float velocity_in, const float dt)
             {
                 // Limit the input values to their maximums
                 wheel_angle = std::max(-MAX_WHEEL_ANGLE, std::min(MAX_WHEEL_ANGLE, wheel_angle_in));
                 velocity = std::max(-MAX_VELOCITY, std::min(MAX_VELOCITY, velocity_in));
 
                 // Calculate the new orientation and position
-                double delta_s = velocity * DELTA_T;
-                double delta_theta = (delta_s / WHEELBASE) * tan(wheel_angle);
+                float delta_s = velocity * dt;
+                float delta_theta = (delta_s / WHEELBASE) * tan(wheel_angle);
 
-                x += delta_s * cos(orientation + delta_theta / 2.0);
-                y += delta_s * sin(orientation + delta_theta / 2.0);
+                x += delta_s * std::cos(orientation + delta_theta / 2.0f);
+                y += delta_s * std::sin(orientation + delta_theta / 2.0f);
                 orientation += delta_theta;
 
                 // Ensure the orientation is within the range [0, 2*pi)
-                orientation = fmod(orientation, 2.0 * M_PI);
+                orientation = std::fmod(orientation, 2.0f * M_PI);
 
                 // Calculate the angular velocity
-                angular_velocity = delta_theta / DELTA_T;
+                angular_velocity = delta_theta / dt;
+
+                wheel_rpm = (velocity / (M_PI * WHEEL_DIAMETER)) * 60.0f;
+                motor_rpm = wheel_rpm / GEAR_RATIO_MOTOR_TO_WHEEL;
             }
+
+            float noisy_yaw_rate()
+            {
+                std::normal_distribution<double> yaw_rate_distribution{angular_velocity, YAW_RATE_NOISE};
+                return yaw_rate_distribution(generator);
+            }
+
+            float noisy_motor_rpm()
+            {
+                std::normal_distribution<double> motor_rpm_distribution{motor_rpm, MOTOR_RPM_NOISE};
+                return motor_rpm_distribution(generator);
+            }
+
+        private:
+            std::default_random_engine generator;
         };
     } // namespace vmodel
 

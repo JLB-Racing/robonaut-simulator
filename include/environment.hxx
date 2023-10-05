@@ -180,13 +180,13 @@ namespace rsim
             };
 
             State state = State::UNMAPPED;
-            double x;
-            double y;
+            float x;
+            float y;
 
             std::chrono::steady_clock::time_point last_seen;
             std::chrono::steady_clock::time_point last_stolen;
 
-            Gate(double x_, double y_) : x{x_}, y{y_} {}
+            Gate(float x_, float y_) : x{x_}, y{y_} {}
         };
 
         class Map
@@ -583,33 +583,29 @@ namespace rsim
 
             void build_gates()
             {
-                // gates.push_back(Gate(320.0, 384.0));
-                gates.push_back(Gate(384.0, 384.0));
-                gates.push_back(Gate(512.0, 384.0));
-                gates.push_back(Gate(640.0, 384.0));
+                gates.push_back(Gate(384.0f, 384.0f));
+                gates.push_back(Gate(512.0f, 384.0f));
+                gates.push_back(Gate(640.0f, 384.0f));
 
-                // gates.push_back(Gate(256.0, 448.0));
-                gates.push_back(Gate(320.0, 448.0));
-                gates.push_back(Gate(448.0, 448.0));
-                gates.push_back(Gate(576.0, 448.0));
-                gates.push_back(Gate(704.0, 448.0));
+                gates.push_back(Gate(320.0f, 448.0f));
+                gates.push_back(Gate(448.0f, 448.0f));
+                gates.push_back(Gate(576.0f, 448.0f));
+                gates.push_back(Gate(704.0f, 448.0f));
 
-                // gates.push_back(Gate(320.0, 512.0));
-                gates.push_back(Gate(384.0, 512.0));
-                gates.push_back(Gate(512.0, 512.0));
-                gates.push_back(Gate(640.0, 512.0));
+                gates.push_back(Gate(384.0f, 512.0f));
+                gates.push_back(Gate(512.0f, 512.0f));
+                gates.push_back(Gate(640.0f, 512.0f));
 
-                // gates.push_back(Gate(256.0, 576.0));
-                gates.push_back(Gate(320.0, 576.0));
-                gates.push_back(Gate(448.0, 576.0));
-                gates.push_back(Gate(576.0, 576.0));
-                gates.push_back(Gate(704.0, 576.0));
+                gates.push_back(Gate(320.0f, 576.0f));
+                gates.push_back(Gate(448.0f, 576.0f));
+                gates.push_back(Gate(576.0f, 576.0f));
+                gates.push_back(Gate(704.0f, 576.0f));
 
-                gates.push_back(Gate(384.0, 640.0));
-                gates.push_back(Gate(512.0, 640.0));
-                gates.push_back(Gate(640.0, 640.0));
+                gates.push_back(Gate(384.0f, 640.0f));
+                gates.push_back(Gate(512.0f, 640.0f));
+                gates.push_back(Gate(640.0f, 640.0f));
 
-                gates.push_back(Gate(320.0, 704.0));
+                gates.push_back(Gate(320.0f, 704.0f));
             }
         };
 
@@ -619,13 +615,17 @@ namespace rsim
             rsim::vmodel::State state;
             rsim::smodel::LineSensor line_sensor;
 
-            Car(double x_, double y_, double orientation_) : state{x_, y_, orientation_}, line_sensor{state}
+            Car(float x_, float y_, float orientation_) : state{x_, y_, orientation_}, line_sensor{state}
             {
             }
 
-            void update(double wheel_angle, double velocity)
+            void update(float wheel_angle, float velocity)
             {
-                state.update(wheel_angle, velocity);
+                auto update_timestamp_ = std::chrono::steady_clock::now();
+                float dt = std::chrono::duration_cast<std::chrono::milliseconds>(update_timestamp_ - prev_update_timestamp_).count() / 1000.0f;
+                prev_update_timestamp_ = update_timestamp_;
+                
+                state.update(wheel_angle, velocity, dt);
                 line_sensor.update(state);
             }
 
@@ -636,6 +636,7 @@ namespace rsim
             }
 
         private:
+            std::chrono::time_point<std::chrono::steady_clock> prev_update_timestamp_ = std::chrono::steady_clock::now();
         };
 
     } // namespace env
