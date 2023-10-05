@@ -28,8 +28,7 @@ int main(int, char **)
                 /*      UPDATE CONTROL LOGIC HERE                            */
                 /*                                                   */
                 odometry.update_odom();
-                controller.set_current_velocity(odometry.vx_t);
-                controller.update(simulation.car.line_sensor.detection);
+                controller.update(simulation.car.line_sensor.detection, odometry.vx_t);
                 /*                                                   */
                 /*===================================================*/
 
