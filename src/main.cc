@@ -1,22 +1,24 @@
 #include <iostream>
 #include <thread>
 
-#include "simulation.hxx"
-#include "environment.hxx"
+#include <SFML/Graphics.hpp>
 
+#include "simulation.hxx"
+
+/*===================================================*/
+/*      INCLUDE YOUR HEADERS HERE                    */
+/*                                                   */
 #include "JLB/logic.hxx"
 #include "JLB/odometry.hxx"
-
-#include <SFML/Graphics.hpp>
+/*                                                   */
+/*===================================================*/
 
 int main(int, char **)
 {
     rsim::Simulation simulation;
 
-    jlb::Controller controller;
-    controller.direction = jlb::Direction::RIGHT;
-
-    jlb::Odometry odometry{rsim::start_x, rsim::start_y, rsim::start_orientation};
+    jlb::Controller controller{jlb::Direction::RIGHT};
+    jlb::Odometry odometry{rsim::START_X, rsim::START_Y, rsim::START_ORIENTATION};
 
     std::thread thread_control(
         [&]()
@@ -25,10 +27,11 @@ int main(int, char **)
             {
 
                 /*===================================================*/
-                /*      UPDATE CONTROL LOGIC HERE                            */
+                /*      UPDATE CONTROL LOGIC HERE                    */
                 /*                                                   */
-                odometry.update_odom();
-                controller.update(simulation.car.line_sensor.detection, odometry.vx_t);
+                [[maybe_unused]] auto [vx, x, y, theta] = odometry.update_odom();
+                controller.set_current_velocity(vx);
+                controller.update();
                 /*                                                   */
                 /*===================================================*/
 
@@ -36,16 +39,16 @@ int main(int, char **)
             }
         });
 
-    std::thread thread_sensors(
+    std::thread thread_sensors_high(
         [&]()
         {
             while (true)
             {
-                auto motor_rpm = simulation.car.state.noisy_motor_rpm();
-                auto yaw_rate = simulation.car.state.noisy_yaw_rate();
+                [[maybe_unused]] auto motor_rpm = simulation.car.noisy_motor_rpm();
+                [[maybe_unused]] auto yaw_rate = simulation.car.noisy_yaw_rate();
 
                 /*===================================================*/
-                /*      UPDATE SENSOR LOGIC HERE                         */
+                /*      UPDATE SENSOR LOGIC HERE                     */
                 /*                                                   */
                 odometry.rpm_callback(motor_rpm);
                 odometry.imu_callback(yaw_rate);
@@ -53,6 +56,24 @@ int main(int, char **)
                 /*===================================================*/
 
                 std::this_thread::sleep_for(std::chrono::milliseconds(5)); // 200 Hz
+            }
+        });
+
+    std::thread thread_sensors_low(
+        [&]()
+        {
+            while (true)
+            {
+                [[maybe_unused]] auto detection = simulation.car.detect(simulation.map.data);
+
+                /*===================================================*/
+                /*      UPDATE SENSOR LOGIC HERE                     */
+                /*                                                   */
+                controller.set_detection(detection);
+                /*                                                   */
+                /*===================================================*/
+
+                std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 100 Hz
             }
         });
 
@@ -194,7 +215,8 @@ int main(int, char **)
     ///////////////////////////////////////////////////////////////////////////
 
     thread_control.join();
-    thread_sensors.join();
+    thread_sensors_high.join();
+    thread_sensors_low.join();
     thread_simulation.join();
 
     return EXIT_SUCCESS;

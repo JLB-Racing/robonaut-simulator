@@ -17,12 +17,6 @@ namespace rsim
 
     namespace env
     {
-        static constexpr int BITMAP_SIZE = 64;
-        static constexpr int GRID_WIDTH = 17;
-        static constexpr int GRID_HEIGHT = 16;
-        static constexpr int MAP_WIDTH = GRID_WIDTH * BITMAP_SIZE;
-        static constexpr int MAP_HEIGHT = GRID_HEIGHT * BITMAP_SIZE;
-
         class Bitmap
         {
         public:
@@ -30,9 +24,9 @@ namespace rsim
 
             Bitmap()
             {
-                for (int i = 0; i < BITMAP_SIZE; i++)
+                for (unsigned i = 0; i < BITMAP_SIZE; i++)
                 {
-                    for (int j = 0; j < BITMAP_SIZE; j++)
+                    for (unsigned j = 0; j < BITMAP_SIZE; j++)
                     {
                         bitmap[i][j] = true;
                     }
@@ -90,26 +84,26 @@ namespace rsim
                 bool rotated[BITMAP_SIZE][BITMAP_SIZE];
 
                 // Transpose
-                for (int i = 0; i < BITMAP_SIZE; i++)
+                for (unsigned i = 0; i < BITMAP_SIZE; i++)
                 {
-                    for (int j = 0; j < BITMAP_SIZE; j++)
+                    for (unsigned j = 0; j < BITMAP_SIZE; j++)
                     {
                         rotated[i][j] = bitmap[j][i];
                     }
                 }
 
                 // reversing each row
-                for (int i = 0; i < BITMAP_SIZE; i++)
+                for (unsigned i = 0; i < BITMAP_SIZE; i++)
                 {
-                    for (int j = 0, k = BITMAP_SIZE - 1; j < k; j++, k--)
+                    for (unsigned j = 0, k = BITMAP_SIZE - 1; j < k; j++, k--)
                     {
                         std::swap(rotated[j][i], rotated[k][i]);
                     }
                 }
 
-                for (int i = 0; i < BITMAP_SIZE; i++)
+                for (unsigned i = 0; i < BITMAP_SIZE; i++)
                 {
-                    for (int j = 0; j < BITMAP_SIZE; j++)
+                    for (unsigned j = 0; j < BITMAP_SIZE; j++)
                     {
                         bitmap[i][j] = rotated[i][j];
                     }
@@ -131,9 +125,9 @@ namespace rsim
 
             void flip_horizontal()
             {
-                for (int i = 0; i < BITMAP_SIZE; i++)
+                for (unsigned i = 0; i < BITMAP_SIZE; i++)
                 {
-                    for (int j = 0, k = BITMAP_SIZE - 1; j < k; j++, k--)
+                    for (unsigned j = 0, k = BITMAP_SIZE - 1; j < k; j++, k--)
                     {
                         std::swap(bitmap[j][i], bitmap[k][i]);
                     }
@@ -142,9 +136,9 @@ namespace rsim
 
             void flip_vertical()
             {
-                for (int i = 0; i < BITMAP_SIZE; i++)
+                for (unsigned i = 0; i < BITMAP_SIZE; i++)
                 {
-                    for (int j = 0, k = BITMAP_SIZE - 1; j < k; j++, k--)
+                    for (unsigned j = 0, k = BITMAP_SIZE - 1; j < k; j++, k--)
                     {
                         std::swap(bitmap[i][j], bitmap[i][k]);
                     }
@@ -153,9 +147,9 @@ namespace rsim
 
             friend std::ostream &operator<<(std::ostream &os, const Bitmap &bitmap)
             {
-                for (int i = 0; i < BITMAP_SIZE; i++)
+                for (unsigned i = 0; i < BITMAP_SIZE; i++)
                 {
-                    for (int j = 0; j < BITMAP_SIZE; j++)
+                    for (unsigned j = 0; j < BITMAP_SIZE; j++)
                     {
                         if (bitmap.bitmap[i][j])
                             os << "░";
@@ -205,15 +199,15 @@ namespace rsim
                 build_gates();
 
                 // iterate over grid and fill in data indexing is [col][row]
-                for (int gcol = 0; gcol < GRID_WIDTH; gcol++)
-                    for (int grow = 0; grow < GRID_HEIGHT; grow++)
-                        for (int bcol = 0; bcol < BITMAP_SIZE; bcol++)
-                            for (int brow = 0; brow < BITMAP_SIZE; brow++)
+                for (unsigned gcol = 0; gcol < GRID_WIDTH; gcol++)
+                    for (unsigned grow = 0; grow < GRID_HEIGHT; grow++)
+                        for (unsigned bcol = 0; bcol < BITMAP_SIZE; bcol++)
+                            for (unsigned brow = 0; brow < BITMAP_SIZE; brow++)
                                 data[gcol * BITMAP_SIZE + bcol][grow * BITMAP_SIZE + brow] = grid[gcol][grow].bitmap[bcol][brow];
             }
 
         private:
-            Bitmap grid[GRID_WIDTH][GRID_HEIGHT] = {{rsim::env::Bitmap{}}};
+            Bitmap grid[GRID_WIDTH][GRID_HEIGHT] = {{env::Bitmap{}}};
             Bitmap balancer = Bitmap("assets/balancer.bmp");
             Bitmap start = Bitmap("assets/start.bmp");
             Bitmap line = Bitmap("assets/line.bmp");
@@ -612,8 +606,8 @@ namespace rsim
         class Car
         {
         public:
-            rsim::vmodel::State state;
-            rsim::smodel::LineSensor line_sensor;
+            vmodel::State state;
+            smodel::LineSensor line_sensor;
 
             Car(float x_, float y_, float orientation_) : state{x_, y_, orientation_}, line_sensor{state}
             {
@@ -624,15 +618,25 @@ namespace rsim
                 auto update_timestamp_ = std::chrono::steady_clock::now();
                 float dt = std::chrono::duration_cast<std::chrono::milliseconds>(update_timestamp_ - prev_update_timestamp_).count() / 1000.0f;
                 prev_update_timestamp_ = update_timestamp_;
-                
+
                 state.update(wheel_angle, velocity, dt);
                 line_sensor.update(state);
             }
 
             template <size_t cols, size_t rows>
-            void detect(bool (&map)[cols][rows])
+            bool (&detect(bool (&map)[cols][rows]))[smodel::SENSOR_WIDTH]
             {
-                line_sensor.detect(map);
+                return line_sensor.detect(map);
+            }
+
+            float noisy_motor_rpm()
+            {
+                return state.noisy_motor_rpm();
+            }
+
+            float noisy_yaw_rate()
+            {
+                return state.noisy_yaw_rate();
             }
 
         private:

@@ -9,14 +9,9 @@ namespace rsim
 {
     namespace smodel
     {
-        static constexpr int SENSOR_WIDTH = 16;
-
-        // this is simulating a Line sensor that has a 16x1 return array
         class LineSensor
         {
         public:
-            bool detection[SENSOR_WIDTH];
-
             LineSensor(const rsim::vmodel::State &state_) : state{state_}
             {
                 for (int i = 0; i < SENSOR_WIDTH; i++)
@@ -29,7 +24,7 @@ namespace rsim
             }
 
             template <size_t cols, size_t rows>
-            void detect(bool (&map)[cols][rows])
+            bool (&detect(bool (&map)[cols][rows]))[SENSOR_WIDTH]
             {
                 // Reset detection results
                 for (int i = 0; i < SENSOR_WIDTH; i++)
@@ -48,10 +43,23 @@ namespace rsim
                         detection[i] = map[x][y];
                     }
                 }
+
+                return detection;
+            }
+
+            bool (&get_detection())[SENSOR_WIDTH]
+            {
+                return detection;
+            }
+
+            void set_detection(unsigned long i, bool value)
+            {
+                detection[i] = value;
             }
 
         private:
             rsim::vmodel::State state;
+            bool detection[SENSOR_WIDTH];
         };
     } // namespace smodel
 

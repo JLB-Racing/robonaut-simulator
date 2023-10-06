@@ -1,19 +1,12 @@
 #ifndef SIMULATION_HXX
 #define SIMULATION_HXX
 
+#include "utility.hxx"
 #include "environment.hxx"
 #include "pirate_model.hxx"
 
 namespace rsim
 {
-    float start_x = 320.0f;
-    float start_y = 724.0f;
-    float start_orientation = -M_PI / 2.0f;
-
-    float pirate_start_x = 320.0f;
-    float pirate_start_y = 300.0f;
-    float pirate_start_orientation = M_PI / 2.0f;
-
     class Simulation
     {
     public:
@@ -21,11 +14,11 @@ namespace rsim
         env::Car pirate;
         env::Map map;
 
-        logic::PirateController pirate_controller;
+        pmodel::PirateController pirate_controller;
 
         int collected_points = 0;
 
-        Simulation() : car{start_x, start_y, start_orientation}, pirate{pirate_start_x, pirate_start_y, pirate_start_orientation}
+        Simulation() : car{START_X, START_Y, START_ORIENTATION}, pirate{PIRATE_START_X, PIRATE_START_Y, PIRATE_START_ORIENTATION}
         {
         }
 
@@ -44,11 +37,11 @@ namespace rsim
                         if (i == smodel::SENSOR_WIDTH / 2 + 1 || i == smodel::SENSOR_WIDTH / 2 - 1 - 1 ||
                             i == smodel::SENSOR_WIDTH / 2 + 3 || i == smodel::SENSOR_WIDTH / 2 - 1 - 3)
                         {
-                            car.line_sensor.detection[i] = false;
+                            car.line_sensor.set_detection(i, false);
                         }
                         else
                         {
-                            car.line_sensor.detection[i] = true;
+                            car.line_sensor.set_detection(i, true);
                         }
                     }
                     if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - gate.last_seen).count() > 2)
@@ -107,11 +100,10 @@ namespace rsim
                 }
             }
 
-            car.detect(map.data);
             car.update(target_angle, target_speed);
 
             pirate.detect(map.data);
-            pirate_controller.update(pirate.line_sensor.detection, pirate_under_gate);
+            pirate_controller.update(pirate.line_sensor.get_detection(), pirate_under_gate);
             pirate.update(pirate_controller.target_angle, pirate_controller.target_speed);
         }
 

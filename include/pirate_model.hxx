@@ -7,7 +7,7 @@
 
 namespace rsim
 {
-    namespace logic
+    namespace pmodel
     {
         enum class Direction
         {
@@ -166,11 +166,6 @@ namespace rsim
         class PirateController
         {
         public:
-            static constexpr float Kp = 0.8f;
-            static constexpr float Ki = 0.01f;
-            static constexpr float Kd = 0.6f;
-            static constexpr float SPEED = 25.0f;
-
             unsigned long selected = 0;
             float target_angle = 0.0f;
             float target_speed = 0.0f;
@@ -274,7 +269,7 @@ namespace rsim
             char current_node;
             char next_node;
         };
-    } // namespace logic
+    } // namespace pmodel
 
 } // namespace rsim
 

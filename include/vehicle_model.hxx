@@ -8,16 +8,6 @@ namespace rsim
 {
     namespace vmodel
     {
-        static constexpr float MAX_WHEEL_ANGLE = 1.0f;
-        static constexpr float MAX_VELOCITY = 500.0f;
-        static constexpr float WHEELBASE = 16.0f;
-
-        static constexpr float WHEEL_DIAMETER = 1.0f;
-        static constexpr float GEAR_RATIO_MOTOR_TO_WHEEL = static_cast<float>(3 / 2) * 1.0f;
-
-        static constexpr float YAW_RATE_NOISE = 0.2f;
-        static constexpr float MOTOR_RPM_NOISE = 20.0f;
-
         class State
         {
         public:
