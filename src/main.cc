@@ -6,32 +6,39 @@
 #include "simulation.hxx"
 
 /*===================================================*/
-/*      INCLUDE YOUR HEADERS HERE                    */
+/*      TODO: INCLUDE YOUR HEADERS HERE              */
 /*                                                   */
 #include "JLB/logic.hxx"
-#include "JLB/odometry.hxx"
 /*                                                   */
 /*===================================================*/
 
 int main(int, char **)
 {
     rsim::Simulation simulation;
+    float wheel_angle = 0.0f;
+    float velocity = 0.0f;
 
-    jlb::Controller controller{jlb::Direction::RIGHT};
-    jlb::Odometry odometry{rsim::START_X, rsim::START_Y, rsim::START_ORIENTATION};
+    /*===================================================*/
+    /*      TODO: INITIALIZE YOUR LOGIC HERE             */
+    /*                                                   */
+    jlb::Logic logic{jlb::Direction::RIGHT, rsim::START_X, rsim::START_Y, rsim::START_ORIENTATION};
+    /*                                                   */
+    /*===================================================*/
 
     std::thread thread_control(
         [&]()
         {
             while (true)
             {
-
                 /*===================================================*/
-                /*      UPDATE CONTROL LOGIC HERE                    */
+                /*      TODO: UPDATE CONTROL LOGIC HERE              */
                 /*                                                   */
-                [[maybe_unused]] auto [vx, x, y, theta] = odometry.update_odom();
-                controller.set_current_velocity(vx);
-                controller.update();
+                auto [vx, x, y, theta] = logic.odometry.update_odom();
+                logic.controller.set_current_velocity(vx);
+
+                auto [target_angle, target_speed] = logic.controller.update();
+                wheel_angle = target_angle;
+                velocity = target_speed;
                 /*                                                   */
                 /*===================================================*/
 
@@ -48,10 +55,10 @@ int main(int, char **)
                 [[maybe_unused]] auto yaw_rate = simulation.car.noisy_yaw_rate();
 
                 /*===================================================*/
-                /*      UPDATE SENSOR LOGIC HERE                     */
+                /*      TODO: UPDATE SENSOR LOGIC HERE               */
                 /*                                                   */
-                odometry.rpm_callback(motor_rpm);
-                odometry.imu_callback(yaw_rate);
+                logic.odometry.imu_callback(yaw_rate);
+                logic.odometry.rpm_callback(motor_rpm);
                 /*                                                   */
                 /*===================================================*/
 
@@ -67,13 +74,23 @@ int main(int, char **)
                 [[maybe_unused]] auto detection = simulation.car.detect(simulation.map.data);
 
                 /*===================================================*/
-                /*      UPDATE SENSOR LOGIC HERE                     */
+                /*      TODO: UPDATE SENSOR LOGIC HERE               */
                 /*                                                   */
-                controller.set_detection(detection);
+                logic.controller.set_detection(detection);
                 /*                                                   */
                 /*===================================================*/
 
-                std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 100 Hz
+                std::this_thread::sleep_for(std::chrono::milliseconds(25)); // 40 Hz
+            }
+        });
+
+    std::thread thread_visualization(
+        [&]()
+        {
+            while (true)
+            {
+                logic.send_telemetry();
+                std::this_thread::sleep_for(std::chrono::milliseconds(100)); // 10 Hz
             }
         });
 
@@ -82,8 +99,8 @@ int main(int, char **)
         {
             while (true)
             {
-                simulation.update(controller.target_angle, controller.target_speed);
-                std::this_thread::sleep_for(std::chrono::milliseconds(20)); // 50 Hz
+                simulation.update(wheel_angle, velocity);
+                std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 100 Hz
             }
         });
 
@@ -194,8 +211,21 @@ int main(int, char **)
         /*      CARS                                        */
         /*===================================================*/
 
-        odom_sprite.setPosition(odometry.x_t, odometry.y_t);
-        odom_sprite.setRotation(odometry.theta_t * 180 / M_PI + 90);
+        float odom_x = 0.0f;
+        float odom_y = 0.0f;
+        float odom_theta = 0.0f;
+
+        /*===================================================*/
+        /*      TODO: UPDATE ODOMETRY VISUALIZATION HERE     */
+        /*                                                   */
+        odom_x = logic.odometry.x_t;
+        odom_y = logic.odometry.y_t;
+        odom_theta = logic.odometry.theta_t;
+        /*                                                   */
+        /*===================================================*/
+
+        odom_sprite.setPosition(odom_x, odom_y);
+        odom_sprite.setRotation(odom_theta * 180 / M_PI + 90);
         window.draw(odom_sprite);
 
         car_sprite.setPosition(simulation.car.state.x, simulation.car.state.y);
@@ -217,6 +247,7 @@ int main(int, char **)
     thread_control.join();
     thread_sensors_high.join();
     thread_sensors_low.join();
+    thread_visualization.join();
     thread_simulation.join();
 
     return EXIT_SUCCESS;
