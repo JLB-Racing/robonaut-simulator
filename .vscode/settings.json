@@ -63,7 +63,8 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "codecvt": "cpp",
-        "numbers": "cpp"
+        "numbers": "cpp",
+        "filesystem": "cpp"
     },
     "ros.distro": "galactic"
 }

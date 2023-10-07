@@ -8,6 +8,7 @@
 #include <sstream>
 #include <bitset>
 #include <chrono>
+#include <filesystem>
 
 #include "vehicle_model.hxx"
 #include "sensor_model.hxx"
@@ -204,6 +205,8 @@ namespace rsim
                         for (unsigned bcol = 0; bcol < BITMAP_SIZE; bcol++)
                             for (unsigned brow = 0; brow < BITMAP_SIZE; brow++)
                                 data[gcol * BITMAP_SIZE + bcol][grow * BITMAP_SIZE + brow] = grid[gcol][grow].bitmap[bcol][brow];
+
+                serialize_map("competition.map");
             }
 
         private:
@@ -228,6 +231,37 @@ namespace rsim
             Bitmap turn_line_wide = Bitmap("assets/turn-line-wide.bmp");
             Bitmap turn_line2_wide = Bitmap("assets/turn-line-2-wide.bmp");
             Bitmap turn_line3_wide = Bitmap("assets/turn-line-3-wide.bmp");
+
+            void serialize_map(const std::string &filename)
+            {
+                // # The map data, in row-major order, starting with (0,0).
+                // # Cell (1, 0) will be listed second, representing the next cell in the x direction.
+                // # Cell (0, 1) will be at the index equal to info.width, followed by (1, 1).
+                // # The values inside are application dependent, but frequently,
+                // # 0 represents unoccupied, 1 represents definitely occupied, and
+                // # -1 represents unknown.
+                // int8[] data
+
+                // serialize the map into the above format:
+                std::ofstream map_file;
+                // with preferred separator
+                auto file_path = "maps" + std::string{std::filesystem::path::preferred_separator} + filename;
+                map_file.open(file_path);
+                map_file << MAP_WIDTH << std::endl;
+                map_file << MAP_HEIGHT << std::endl;
+                for (unsigned long row = 0; row < MAP_HEIGHT; row++)
+                {
+                    for (unsigned long col = 0; col < MAP_WIDTH; col++)
+                    {
+                        if (data[col][row])
+                            map_file << "0";
+                        else
+                            map_file << "1";
+                    }
+                }
+
+                map_file.close();
+            }
 
             void build_grid()
             {
