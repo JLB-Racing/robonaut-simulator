@@ -51,18 +51,18 @@ namespace rsim
 
             float noisy_yaw_rate()
             {
-                std::normal_distribution<double> yaw_rate_distribution{angular_velocity, YAW_RATE_NOISE};
-                return yaw_rate_distribution(generator);
+                return angular_velocity + yaw_rate_distribution(generator);
             }
 
             float noisy_motor_rpm()
             {
-                std::normal_distribution<double> motor_rpm_distribution{motor_rpm, MOTOR_RPM_NOISE};
-                return motor_rpm_distribution(generator);
+                return motor_rpm + motor_rpm_distribution(generator);
             }
 
         private:
             std::default_random_engine generator;
+            std::normal_distribution<float> motor_rpm_distribution{0.0f, MOTOR_RPM_NOISE};
+            std::normal_distribution<float> yaw_rate_distribution{0.0f, YAW_RATE_NOISE};
         };
 
         class DynamicState : public State
