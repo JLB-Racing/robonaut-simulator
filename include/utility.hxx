@@ -71,10 +71,10 @@ namespace rsim
         PARAM float WHEEL_DIAMETER = 1.0f;                                        // px
         PARAM float GEAR_RATIO_MOTOR_TO_WHEEL = static_cast<float>(3 / 2) * 1.0f; // -
 
-        // PARAM float YAW_RATE_NOISE = 0.2f;   // rad/s
-        // PARAM float MOTOR_RPM_NOISE = 20.0f; // rpm
-        PARAM float YAW_RATE_NOISE = 0.0f;  // rad/s
-        PARAM float MOTOR_RPM_NOISE = 0.0f; // rpm
+        PARAM float YAW_RATE_NOISE = 0.2f;   // rad/s
+        PARAM float MOTOR_RPM_NOISE = 20.0f; // rpm
+        // PARAM float YAW_RATE_NOISE = 0.0f;  // rad/s
+        // PARAM float MOTOR_RPM_NOISE = 0.0f; // rpm
 
     } // namespace vmodel
 
