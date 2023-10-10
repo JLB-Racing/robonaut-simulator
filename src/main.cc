@@ -100,7 +100,7 @@ int main(int, char **)
             while (true)
             {
                 simulation.update(wheel_angle, velocity);
-                std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 100 Hz
+                std::this_thread::sleep_for(std::chrono::milliseconds(33)); // 30Hz
             }
         });
 
