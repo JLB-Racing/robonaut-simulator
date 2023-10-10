@@ -18,6 +18,12 @@ include_directories(include)
 add_executable(robonaut-simulator src/main.cc)
 target_link_libraries(robonaut-simulator sfml-graphics sfml-audio)
 
+add_subdirectory(include/JLB)
+include_directories(include/JLB/lib/can_matrix/butl)
+include_directories(include/JLB/lib/can_matrix/conf)
+include_directories(include/JLB/lib/can_matrix/lib)
+target_link_libraries(robonaut-simulator can_matrix)
+
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
