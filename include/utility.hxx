@@ -9,6 +9,8 @@
 //
 
 #define PARAM static constexpr
+#define px_to_m(px) (px * rsim::SQUARE_LENGTH / rsim::env::BITMAP_SIZE)
+#define m_to_px(m) (m * rsim::env::BITMAP_SIZE / rsim::SQUARE_LENGTH)
 
 //
 //      END DEFINES
@@ -29,6 +31,8 @@ namespace rsim
     PARAM float PIRATE_START_X = 320.0f;                // px
     PARAM float PIRATE_START_Y = 300.0f;                // px
     PARAM float PIRATE_START_ORIENTATION = M_PI / 2.0f; // rad
+
+    PARAM float SQUARE_LENGTH = 0.6; // m
 
     //
     //      END SIMULATION

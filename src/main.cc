@@ -16,12 +16,16 @@ int main(int, char **)
 {
     rsim::Simulation simulation;
     float wheel_angle = 0.0f;
-    float velocity = 0.0f;
+    float velocity = m_to_px(0.0f);
+
+    [[maybe_unused]] auto x_t0 = px_to_m(rsim::START_X);
+    [[maybe_unused]] auto y_t0 = px_to_m(rsim::START_Y);
+    [[maybe_unused]] auto theta_t0 = rsim::START_ORIENTATION;
 
     /*===================================================*/
     /*      TODO: INITIALIZE YOUR LOGIC HERE             */
     /*                                                   */
-    jlb::Logic logic{jlb::Direction::RIGHT, rsim::START_X, rsim::START_Y, rsim::START_ORIENTATION};
+    jlb::Logic logic{jlb::Direction::RIGHT, x_t0, y_t0, theta_t0};
     /*                                                   */
     /*===================================================*/
 
@@ -38,7 +42,7 @@ int main(int, char **)
 
                 auto [target_angle, target_speed] = logic.controller.update();
                 wheel_angle = target_angle;
-                velocity = target_speed;
+                velocity = m_to_px(target_speed);
                 /*                                                   */
                 /*===================================================*/
 
@@ -211,15 +215,15 @@ int main(int, char **)
         /*      CARS                                        */
         /*===================================================*/
 
-        float odom_x = 0.0f;
-        float odom_y = 0.0f;
+        float odom_x = m_to_px(0.0f);
+        float odom_y = m_to_px(0.0f);
         float odom_theta = 0.0f;
 
         /*===================================================*/
         /*      TODO: UPDATE ODOMETRY VISUALIZATION HERE     */
         /*                                                   */
-        odom_x = logic.odometry.x_t;
-        odom_y = logic.odometry.y_t;
+        odom_x = m_to_px(logic.odometry.x_t);
+        odom_y = m_to_px(logic.odometry.y_t);
         odom_theta = logic.odometry.theta_t;
         /*                                                   */
         /*===================================================*/
