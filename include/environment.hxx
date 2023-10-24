@@ -641,9 +641,10 @@ namespace rsim
         {
         public:
             vmodel::State state;
-            smodel::LineSensor line_sensor;
+            smodel::LineSensor line_sensor_front;
+            smodel::LineSensor line_sensor_rear;
 
-            Car(float x_, float y_, float orientation_) : state{x_, y_, orientation_}, line_sensor{state}
+            Car(float x_, float y_, float orientation_) : state{x_, y_, orientation_}, line_sensor_front{state}, line_sensor_rear{state}
             {
             }
 
@@ -654,13 +655,20 @@ namespace rsim
                 prev_update_timestamp_ = update_timestamp_;
 
                 state.update(wheel_angle, velocity, dt);
-                line_sensor.update(state);
+                line_sensor_front.update(state);
+                line_sensor_rear.update(state);
             }
 
             template <size_t cols, size_t rows>
-            bool (&detect(bool (&map)[cols][rows]))[smodel::SENSOR_WIDTH]
+            bool (&detect_front(bool (&map)[cols][rows]))[smodel::SENSOR_WIDTH]
             {
-                return line_sensor.detect(map);
+                return line_sensor_front.detect(map, 8);
+            }
+
+            template <size_t cols, size_t rows>
+            bool (&detect_rear(bool (&map)[cols][rows]))[smodel::SENSOR_WIDTH]
+            {
+                return line_sensor_rear.detect(map, -8);
             }
 
             float noisy_motor_rpm()

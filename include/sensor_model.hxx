@@ -24,7 +24,7 @@ namespace rsim
             }
 
             template <size_t cols, size_t rows>
-            bool (&detect(bool (&map)[cols][rows]))[SENSOR_WIDTH]
+            bool (&detect(bool (&map)[cols][rows], int offset = 0))[SENSOR_WIDTH]
             {
                 // Reset detection results
                 for (int i = 0; i < SENSOR_WIDTH; i++)
@@ -34,8 +34,12 @@ namespace rsim
                 for (int i = 0; i < SENSOR_WIDTH; i++)
                 {
                     // Calculate the position of the point along the line
-                    unsigned long x = state.x + (i - SENSOR_WIDTH / 2) * std::cos(state.orientation + M_PI / 2);
-                    unsigned long y = state.y + (i - SENSOR_WIDTH / 2) * std::sin(state.orientation + M_PI / 2);
+                    // unsigned long x = state.x + (i - SENSOR_WIDTH / 2) * std::cos(state.orientation + M_PI / 2);
+                    // unsigned long y = state.y + (i - SENSOR_WIDTH / 2) * std::sin(state.orientation + M_PI / 2);
+
+                    // the above commented out code is the original code, but I've added an offset parameter, that allows the sensor to be offset from the center of the car in the direction of the car's orientation
+                    unsigned long x = state.x + (i - SENSOR_WIDTH / 2) * std::cos(state.orientation + M_PI / 2) + offset * std::cos(state.orientation);
+                    unsigned long y = state.y + (i - SENSOR_WIDTH / 2) * std::sin(state.orientation + M_PI / 2) + offset * std::sin(state.orientation);
 
                     // Check if the point is within the map bounds
                     if (x >= 0 && x < cols && y >= 0 && y < rows)

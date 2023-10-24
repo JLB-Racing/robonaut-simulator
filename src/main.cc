@@ -75,12 +75,14 @@ int main(int, char **)
         {
             while (true)
             {
-                [[maybe_unused]] auto detection = simulation.car.detect(simulation.map.data);
+                [[maybe_unused]] auto detection_front = simulation.car.detect_front(simulation.map.data);
+                [[maybe_unused]] auto detection_rear = simulation.car.detect_rear(simulation.map.data);
 
                 /*===================================================*/
                 /*      TODO: UPDATE SENSOR LOGIC HERE               */
                 /*                                                   */
-                logic.controller.set_detection(detection);
+                logic.controller.set_detection_front(detection_front);
+                logic.controller.set_detection_rear(detection_rear);
                 /*                                                   */
                 /*===================================================*/
 
