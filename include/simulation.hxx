@@ -31,11 +31,11 @@ namespace rsim
                 if (std::sqrt(std::pow(gate.x - car.state.x, 2) + std::pow(gate.y - car.state.y, 2)) < 8.0f)
                 {
                     car_under_gate = true;
-                    for (unsigned long i = 0; i < smodel::SENSOR_WIDTH; i++)
+                    for (unsigned long i = 0; i < smodel::SENSOR_COUNT; i++)
                     {
                         // 1111010110101111 gate signature
-                        if (i == smodel::SENSOR_WIDTH / 2 + 1 || i == smodel::SENSOR_WIDTH / 2 - 1 - 1 ||
-                            i == smodel::SENSOR_WIDTH / 2 + 3 || i == smodel::SENSOR_WIDTH / 2 - 1 - 3)
+                        if (i == smodel::SENSOR_COUNT / 2 + 1 || i == smodel::SENSOR_COUNT / 2 - 1 - 1 ||
+                            i == smodel::SENSOR_COUNT / 2 + 3 || i == smodel::SENSOR_COUNT / 2 - 1 - 3)
                         {
                             car.line_sensor_front.set_detection(i, false);
                         }

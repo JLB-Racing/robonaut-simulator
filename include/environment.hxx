@@ -660,15 +660,15 @@ namespace rsim
             }
 
             template <size_t cols, size_t rows>
-            bool (&detect_front(bool (&map)[cols][rows]))[smodel::SENSOR_WIDTH]
+            bool (&detect_front(bool (&map)[cols][rows]))[smodel::SENSOR_COUNT]
             {
                 return line_sensor_front.detect(map, 8);
             }
 
             template <size_t cols, size_t rows>
-            bool (&detect_rear(bool (&map)[cols][rows]))[smodel::SENSOR_WIDTH]
+            bool (&detect_rear(bool (&map)[cols][rows]))[smodel::SENSOR_COUNT]
             {
-                return line_sensor_rear.detect(map, -8);
+                return line_sensor_rear.detect(map, -7);
             }
 
             float noisy_motor_rpm()

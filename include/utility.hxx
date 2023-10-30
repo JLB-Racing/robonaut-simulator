@@ -93,7 +93,7 @@ namespace rsim
     namespace smodel
     {
 
-        PARAM int SENSOR_WIDTH = 16; // -
+        PARAM int SENSOR_COUNT = 8; // -
 
     } // namespace smodel
 
