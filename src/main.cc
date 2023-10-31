@@ -42,9 +42,11 @@ int main(int, char **)
 
                 auto [target_angle, target_speed] = logic.controller.update();
                 wheel_angle = target_angle;
-                velocity = m_to_px(target_speed);
+                velocity = target_speed;
                 /*                                                   */
                 /*===================================================*/
+
+                velocity = m_to_px(velocity);
 
                 std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 100 Hz
             }
@@ -95,7 +97,7 @@ int main(int, char **)
         {
             while (true)
             {
-                logic.send_telemetry();
+                logic.signal_sender.send_telemetry();
                 std::this_thread::sleep_for(std::chrono::milliseconds(100)); // 10 Hz
             }
         });
