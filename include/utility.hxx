@@ -24,6 +24,8 @@ namespace rsim
     //      SIMULATION
     //
 
+    PARAM bool RUN_HEADLESS = true; // -
+
     PARAM float START_X = 320.0f;                 // px
     PARAM float START_Y = 724.0f;                 // px
     PARAM float START_ORIENTATION = -M_PI / 2.0f; // rad
@@ -75,8 +77,8 @@ namespace rsim
         PARAM float WHEEL_DIAMETER = 1.0f;                                        // px
         PARAM float GEAR_RATIO_MOTOR_TO_WHEEL = static_cast<float>(3 / 2) * 1.0f; // -
 
-        PARAM float YAW_RATE_NOISE = 0.1f;   // rad/s
-        PARAM float MOTOR_RPM_NOISE = 20.0f; // rpm
+        PARAM float YAW_RATE_NOISE = 0.0f;  // rad/s
+        PARAM float MOTOR_RPM_NOISE = 0.0f; // rpm
 
     } // namespace vmodel
 
@@ -93,7 +95,7 @@ namespace rsim
     namespace smodel
     {
 
-        PARAM int SENSOR_COUNT = 8; // -
+        PARAM int SENSOR_COUNT = 16; // -
 
     } // namespace smodel
 

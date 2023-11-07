@@ -9,6 +9,19 @@ namespace rsim
 {
     namespace smodel
     {
+
+        struct SensorDetection
+        {
+            bool detection[SENSOR_COUNT];
+            std::vector<float> line_positions;
+
+            SensorDetection(bool (&detection_)[SENSOR_COUNT], std::vector<float> line_positions_) : line_positions{line_positions_}
+            {
+                for (int i = 0; i < SENSOR_COUNT; i++)
+                    detection[i] = detection_[i];
+            }
+        };
+
         class LineSensor
         {
         public:
@@ -24,22 +37,26 @@ namespace rsim
             }
 
             template <size_t cols, size_t rows>
-            bool (&detect(bool (&map)[cols][rows], int offset = 0))[SENSOR_COUNT]
+            SensorDetection detect(bool (&map)[cols][rows], int offset = 0)
             {
                 // Reset detection results
                 for (int i = 0; i < SENSOR_COUNT; i++)
                     detection[i] = true;
 
+                // Reset line positions
+                line_positions.clear();
+
+                float sensor_center = (SENSOR_COUNT + 1) / 2.0f;
+
                 // Calculate the points along the sensor's line
                 for (int i = 0; i < SENSOR_COUNT; i++)
                 {
-                    // Calculate the position of the point along the line
-                    // unsigned long x = state.x + (i - SENSOR_COUNT / 2) * std::cos(state.orientation + M_PI / 2);
-                    // unsigned long y = state.y + (i - SENSOR_COUNT / 2) * std::sin(state.orientation + M_PI / 2);
-
-                    // the above commented out code is the original code, but I've added an offset parameter, that allows the sensor to be offset from the center of the car in the direction of the car's orientation
-                    unsigned long x = state.x + (i - SENSOR_COUNT / 2) * std::cos(state.orientation + M_PI / 2) + offset * std::cos(state.orientation);
-                    unsigned long y = state.y + (i - SENSOR_COUNT / 2) * std::sin(state.orientation + M_PI / 2) + offset * std::sin(state.orientation);
+                    unsigned long x = static_cast<unsigned long>(state.x) +
+                                      offset * std::cos(state.orientation) +
+                                      (i - SENSOR_COUNT / 2) * std::cos(state.orientation + M_PI / 2.0f);
+                    unsigned long y = static_cast<unsigned long>(state.y) +
+                                      offset * std::sin(state.orientation) +
+                                      (i - SENSOR_COUNT / 2) * std::sin(state.orientation + M_PI / 2.0f);
 
                     // Check if the point is within the map bounds
                     if (x >= 0 && x < cols && y >= 0 && y < rows)
@@ -48,7 +65,38 @@ namespace rsim
                     }
                 }
 
-                return detection;
+                // iterate over the detection array to find clusters of detected points and calculate their center of mass relative to the center of the sensor
+
+                unsigned long cluster_start = SENSOR_COUNT + 1;
+                unsigned long cluster_end = SENSOR_COUNT + 1;
+                for (unsigned long current_idx = 0; current_idx < SENSOR_COUNT; current_idx++)
+                {
+                    if (!detection[current_idx])
+                    {
+                        if (cluster_start == SENSOR_COUNT + 1)
+                        {
+                            cluster_start = current_idx;
+                        }
+                        cluster_end = current_idx;
+                    }
+                    else
+                    {
+                        if (cluster_start != SENSOR_COUNT + 1)
+                        {
+                            // calculate the center of mass of the cluster
+                            float cluster_center = (cluster_start + 1 + cluster_end + 1) / 2.0f;
+                            // calculate the position of the line relative to the center of the sensor
+                            float line_position = cluster_center - sensor_center;
+                            // add the line position to the vector
+                            line_positions.push_back(line_position);
+                            // reset the cluster start and end
+                            cluster_start = SENSOR_COUNT + 1;
+                            cluster_end = SENSOR_COUNT + 1;
+                        }
+                    }
+                }
+
+                return SensorDetection{detection, line_positions};
             }
 
             bool (&get_detection())[SENSOR_COUNT]
@@ -64,6 +112,7 @@ namespace rsim
         private:
             rsim::vmodel::State state;
             bool detection[SENSOR_COUNT];
+            std::vector<float> line_positions;
         };
     } // namespace smodel
 

@@ -37,10 +37,7 @@ int main(int, char **)
                 /*===================================================*/
                 /*      TODO: UPDATE CONTROL LOGIC HERE              */
                 /*                                                   */
-                auto [vx, x, y, theta] = logic.odometry.update_odom();
-                logic.controller.set_current_velocity(vx);
-
-                auto [target_angle, target_speed] = logic.controller.update();
+                auto [target_angle, target_speed] = logic.update();
                 wheel_angle = target_angle;
                 velocity = target_speed;
                 /*                                                   */
@@ -77,14 +74,25 @@ int main(int, char **)
         {
             while (true)
             {
-                [[maybe_unused]] auto detection_front = simulation.car.detect_front(simulation.map.data);
-                [[maybe_unused]] auto detection_rear = simulation.car.detect_rear(simulation.map.data);
+                [[maybe_unused]] auto [detection_front, line_positions_front] = simulation.car.detect_front(simulation.map.data);
+                [[maybe_unused]] auto [detection_rear, line_positions_rear] = simulation.car.detect_rear(simulation.map.data);
+                [[maybe_unused]] auto under_gate = simulation.car_under_gate;
+                [[maybe_unused]] auto at_cross_section = simulation.car_at_cross_section;
 
                 /*===================================================*/
                 /*      TODO: UPDATE SENSOR LOGIC HERE               */
                 /*                                                   */
-                logic.controller.set_detection_front(detection_front);
-                logic.controller.set_detection_rear(detection_rear);
+
+                for (auto &position : line_positions_front)
+                    position = position * jlb::SENSOR_WIDTH / jlb::SENSOR_COUNT;
+
+                for (auto &position : line_positions_rear)
+                    position = position * jlb::SENSOR_WIDTH / jlb::SENSOR_COUNT;
+
+                logic.controller.set_detection_front(detection_front, line_positions_front);
+                logic.controller.set_detection_rear(detection_rear, line_positions_rear);
+                logic.set_under_gate(under_gate);
+                logic.set_at_cross_section(at_cross_section);
                 /*                                                   */
                 /*===================================================*/
 
@@ -117,134 +125,146 @@ int main(int, char **)
     //      GUI
     //
 
-    sf::RenderWindow window(sf::VideoMode(rsim::env::MAP_WIDTH, rsim::env::MAP_HEIGHT), "RobonAUT Simulator");
-    window.setPosition(sf::Vector2i(500, 50));
-    window.setFramerateLimit(60);
-
-    /*===================================================*/
-    /*      LOAD TEXTURES                                */
-    /*===================================================*/
-
-    sf::Texture car_texture;
-    if (!car_texture.loadFromFile("assets/car.png"))
+    if (!rsim::RUN_HEADLESS)
     {
-        std::cout << "Error loading assets/car.png" << std::endl;
-        return EXIT_FAILURE;
-    }
-    sf::Sprite car_sprite;
-    car_sprite.setTexture(car_texture);
-    car_sprite.setOrigin(8.0f, 8.0f);
 
-    sf::Texture odom_texture;
-    if (!odom_texture.loadFromFile("assets/odom.png"))
-    {
-        std::cout << "Error loading assets/odom.png" << std::endl;
-        return EXIT_FAILURE;
-    }
-    sf::Sprite odom_sprite;
-    odom_sprite.setTexture(odom_texture);
-    odom_sprite.setOrigin(8.0f, 8.0f);
+        sf::RenderWindow window(sf::VideoMode(rsim::env::MAP_WIDTH, rsim::env::MAP_HEIGHT), "RobonAUT Simulator");
+        window.setPosition(sf::Vector2i(500, 50));
+        window.setFramerateLimit(60);
 
-    sf::Texture pirate_texture;
-    if (!pirate_texture.loadFromFile("assets/pirate.png"))
-    {
-        std::cout << "Error loading assets/pirate.png" << std::endl;
-        return EXIT_FAILURE;
-    }
-    sf::Sprite pirate_sprite;
-    pirate_sprite.setTexture(pirate_texture);
-    pirate_sprite.setOrigin(8.0f, 8.0f);
+        /*===================================================*/
+        /*      LOAD TEXTURES                                */
+        /*===================================================*/
 
-    /*===================================================*/
-    /*      DRAW GUI                                     */
-    /*===================================================*/
-
-    while (window.isOpen())
-    {
-        sf::Event event;
-        while (window.pollEvent(event))
+        sf::Texture car_texture;
+        if (!car_texture.loadFromFile("assets/car.png"))
         {
-            if (event.type == sf::Event::Closed)
-                window.close();
+            std::cout << "Error loading assets/car.png" << std::endl;
+            return EXIT_FAILURE;
         }
+        sf::Sprite car_sprite;
+        car_sprite.setTexture(car_texture);
+        car_sprite.setOrigin(8.0f, 8.0f);
 
-        window.clear(sf::Color::White);
-
-        /*===================================================*/
-        /*      GATES                                       */
-        /*===================================================*/
-
-        for (auto gate : simulation.map.gates)
+        sf::Texture odom_texture;
+        if (!odom_texture.loadFromFile("assets/odom.png"))
         {
-            sf::CircleShape circle(8);
-            switch (gate.state)
+            std::cout << "Error loading assets/odom.png" << std::endl;
+            return EXIT_FAILURE;
+        }
+        sf::Sprite odom_sprite;
+        odom_sprite.setTexture(odom_texture);
+        odom_sprite.setOrigin(8.0f, 8.0f);
+
+        sf::Texture pirate_texture;
+        if (!pirate_texture.loadFromFile("assets/pirate.png"))
+        {
+            std::cout << "Error loading assets/pirate.png" << std::endl;
+            return EXIT_FAILURE;
+        }
+        sf::Sprite pirate_sprite;
+        pirate_sprite.setTexture(pirate_texture);
+        pirate_sprite.setOrigin(8.0f, 8.0f);
+
+        /*===================================================*/
+        /*      DRAW GUI                                     */
+        /*===================================================*/
+
+        while (window.isOpen())
+        {
+            sf::Event event;
+            while (window.pollEvent(event))
             {
-            case rsim::env::Gate::State::UNMAPPED:
-                circle.setFillColor(sf::Color(200, 200, 200));
-                break;
-            case rsim::env::Gate::State::STOLEN_ONCE:
-                circle.setFillColor(sf::Color::Yellow);
-                break;
-            case rsim::env::Gate::State::STOLEN_TWICE:
-                circle.setFillColor(sf::Color::Red);
-                break;
-            case rsim::env::Gate::State::MAPPED:
-                circle.setFillColor(sf::Color::Green);
-                break;
+                if (event.type == sf::Event::Closed)
+                    window.close();
             }
 
-            circle.setPosition(gate.x - 8, gate.y - 8);
-            window.draw(circle);
-        }
+            window.clear(sf::Color::White);
 
-        /*===================================================*/
-        /*      MAP                                         */
-        /*===================================================*/
+            /*===================================================*/
+            /*      GATES                                       */
+            /*===================================================*/
 
-        for (unsigned long col = 0; col < rsim::env::MAP_WIDTH; col++)
-        {
-            for (unsigned long row = 0; row < rsim::env::MAP_HEIGHT; row++)
+            for (auto gate : simulation.map.gates)
             {
-                if (!simulation.map.data[col][row])
+                sf::CircleShape circle(8);
+                switch (gate.state)
                 {
-                    sf::RectangleShape rectangle(sf::Vector2f(1, 1));
-                    rectangle.setPosition(col, row);
-                    rectangle.setFillColor(sf::Color::Black);
-                    window.draw(rectangle);
+                case rsim::env::Gate::State::UNMAPPED:
+                    circle.setFillColor(sf::Color(200, 200, 200));
+                    break;
+                case rsim::env::Gate::State::STOLEN_ONCE:
+                    circle.setFillColor(sf::Color::Yellow);
+                    break;
+                case rsim::env::Gate::State::STOLEN_TWICE:
+                    circle.setFillColor(sf::Color::Red);
+                    break;
+                case rsim::env::Gate::State::MAPPED:
+                    circle.setFillColor(sf::Color::Green);
+                    break;
+                }
+
+                circle.setPosition(gate.x - 8, gate.y - 8);
+                window.draw(circle);
+            }
+
+            for (auto cross_section : simulation.map.cross_sections)
+            {
+                sf::CircleShape square(8, 4);
+                square.setFillColor(sf::Color(150, 150, 200));
+                square.setPosition(cross_section.x - 8, cross_section.y - 8);
+                window.draw(square);
+            }
+
+            /*===================================================*/
+            /*      MAP                                         */
+            /*===================================================*/
+
+            for (unsigned long col = 0; col < rsim::env::MAP_WIDTH; col++)
+            {
+                for (unsigned long row = 0; row < rsim::env::MAP_HEIGHT; row++)
+                {
+                    if (!simulation.map.data[col][row])
+                    {
+                        sf::RectangleShape rectangle(sf::Vector2f(1, 1));
+                        rectangle.setPosition(col, row);
+                        rectangle.setFillColor(sf::Color::Black);
+                        window.draw(rectangle);
+                    }
                 }
             }
+
+            /*===================================================*/
+            /*      CARS                                        */
+            /*===================================================*/
+
+            float odom_x = m_to_px(0.0f);
+            float odom_y = m_to_px(0.0f);
+            float odom_theta = 0.0f;
+
+            /*===================================================*/
+            /*      TODO: UPDATE ODOMETRY VISUALIZATION HERE     */
+            /*                                                   */
+            odom_x = m_to_px(logic.odometry.x_t);
+            odom_y = m_to_px(logic.odometry.y_t);
+            odom_theta = logic.odometry.theta_t;
+            /*                                                   */
+            /*===================================================*/
+
+            odom_sprite.setPosition(odom_x, odom_y);
+            odom_sprite.setRotation(odom_theta * 180 / M_PI + 90);
+            window.draw(odom_sprite);
+
+            car_sprite.setPosition(simulation.car.state.x, simulation.car.state.y);
+            car_sprite.setRotation(simulation.car.state.orientation * 180 / M_PI + 90);
+            window.draw(car_sprite);
+
+            pirate_sprite.setPosition(simulation.pirate.state.x, simulation.pirate.state.y);
+            pirate_sprite.setRotation(simulation.pirate.state.orientation * 180 / M_PI + 90);
+            window.draw(pirate_sprite);
+
+            window.display();
         }
-
-        /*===================================================*/
-        /*      CARS                                        */
-        /*===================================================*/
-
-        float odom_x = m_to_px(0.0f);
-        float odom_y = m_to_px(0.0f);
-        float odom_theta = 0.0f;
-
-        /*===================================================*/
-        /*      TODO: UPDATE ODOMETRY VISUALIZATION HERE     */
-        /*                                                   */
-        odom_x = m_to_px(logic.odometry.x_t);
-        odom_y = m_to_px(logic.odometry.y_t);
-        odom_theta = logic.odometry.theta_t;
-        /*                                                   */
-        /*===================================================*/
-
-        odom_sprite.setPosition(odom_x, odom_y);
-        odom_sprite.setRotation(odom_theta * 180 / M_PI + 90);
-        window.draw(odom_sprite);
-
-        car_sprite.setPosition(simulation.car.state.x, simulation.car.state.y);
-        car_sprite.setRotation(simulation.car.state.orientation * 180 / M_PI + 90);
-        window.draw(car_sprite);
-
-        pirate_sprite.setPosition(simulation.pirate.state.x, simulation.pirate.state.y);
-        pirate_sprite.setRotation(simulation.pirate.state.orientation * 180 / M_PI + 90);
-        window.draw(pirate_sprite);
-
-        window.display();
     }
 
     //
