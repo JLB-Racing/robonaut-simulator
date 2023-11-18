@@ -25,13 +25,15 @@ namespace rsim
         class LineSensor
         {
         public:
-            LineSensor(const rsim::vmodel::State &state_) : state{state_}
+            LineSensor(const vmodel::State &state_) : state{state_}
             {
                 for (int i = 0; i < SENSOR_COUNT; i++)
                     detection[i] = true;
             }
 
-            void update(const rsim::vmodel::State &state_)
+            ~LineSensor() {}
+
+            void update(const vmodel::State &state_)
             {
                 state = state_;
             }
@@ -110,9 +112,35 @@ namespace rsim
             }
 
         private:
-            rsim::vmodel::State state;
+            vmodel::State state;
             bool detection[SENSOR_COUNT];
             std::vector<float> line_positions;
+        };
+
+        class ObjectSensor
+        {
+        public:
+            ObjectSensor(const vmodel::State &state_) : state{state_}
+            {
+            }
+
+            ~ObjectSensor()
+            {
+            }
+
+            void update(const vmodel::State &state_)
+            {
+                state = state_;
+            }
+
+            float detect(const vmodel::State &object_)
+            {
+                float distance = std::sqrt(std::pow(object_.x - state.x, 2) + std::pow(object_.y - state.y, 2));
+                return distance;
+            }
+
+        private:
+            vmodel::State state;
         };
     } // namespace smodel
 

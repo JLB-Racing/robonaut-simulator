@@ -15,7 +15,6 @@
 
 namespace rsim
 {
-
     namespace env
     {
         class Bitmap
@@ -670,8 +669,9 @@ namespace rsim
             vmodel::State state;
             smodel::LineSensor line_sensor_front;
             smodel::LineSensor line_sensor_rear;
+            smodel::ObjectSensor object_sensor;
 
-            Car(float x_, float y_, float orientation_) : state{x_, y_, orientation_}, line_sensor_front{state}, line_sensor_rear{state}
+            Car(float x_, float y_, float orientation_) : state{x_, y_, orientation_}, line_sensor_front{state}, line_sensor_rear{state}, object_sensor{state}
             {
             }
 
@@ -684,18 +684,33 @@ namespace rsim
                 state.update(wheel_angle, velocity, dt);
                 line_sensor_front.update(state);
                 line_sensor_rear.update(state);
+                object_sensor.update(state);
             }
 
             template <size_t cols, size_t rows>
             smodel::SensorDetection detect_front(bool (&map)[cols][rows])
             {
-                return line_sensor_front.detect(map, 8);
+                auto detection = line_sensor_front.detect(map, 8);
+                for (auto &line : detection.line_positions)
+                    line = px_to_m(line);
+                return detection;
             }
 
             template <size_t cols, size_t rows>
             smodel::SensorDetection detect_rear(bool (&map)[cols][rows])
             {
-                return line_sensor_rear.detect(map, -7);
+                auto detection = line_sensor_rear.detect(map, -7);
+                for (auto &line : detection.line_positions)
+                    line = px_to_m(line);
+                return detection;
+            }
+
+            float detect_object(vmodel::State object_)
+            {
+                auto distance = px_to_m(object_sensor.detect(object_));
+                if (distance > 2.0f)
+                    distance = 2.0f;
+                return distance;
             }
 
             float noisy_motor_rpm()

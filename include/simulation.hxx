@@ -4,6 +4,7 @@
 #include "utility.hxx"
 #include "environment.hxx"
 #include "pirate_model.hxx"
+#include "safety_car_model.hxx"
 
 namespace rsim
 {
@@ -12,17 +13,17 @@ namespace rsim
     public:
         env::Car car;
         env::Car pirate;
+        env::Car safety_car;
         env::Map map;
 
         pmodel::PirateController pirate_controller;
+        scmodel::SafetyCarController safety_car_controller;
 
         int collected_points = 0;
         bool car_under_gate = false;
         bool car_at_cross_section = false;
 
-        Simulation() : car{START_X, START_Y, START_ORIENTATION}, pirate{PIRATE_START_X, PIRATE_START_Y, PIRATE_START_ORIENTATION}
-        {
-        }
+        Simulation(const float x_t_ = START_X, const float y_t_ = START_Y, const float theta_t_ = START_ORIENTATION) : car{x_t_, y_t_, theta_t_}, pirate{PIRATE_START_X, PIRATE_START_Y, PIRATE_START_ORIENTATION}, safety_car{SAFETY_CAR_START_X, SAFETY_CAR_START_Y, SAFETY_CAR_START_ORIENTATION} {}
 
         void update(const float target_angle, const float target_speed)
         {
@@ -106,12 +107,15 @@ namespace rsim
                 }
             }
 
-            car.update(target_angle, target_speed);
+            car.update(target_angle, m_to_px(target_speed));
 
             // pirate.detect_front(map.data);
-            // pirate.detect_rear(map.data);
             // pirate_controller.update(pirate.line_sensor_front.get_detection(), pirate_under_gate, pirate_at_cross_section, pirate.state);
             // pirate.update(pirate_controller.target_angle, pirate_controller.target_speed);
+
+            safety_car.detect_front(map.data);
+            safety_car_controller.update(safety_car.line_sensor_front.get_detection());
+            safety_car.update(safety_car_controller.target_angle, safety_car_controller.target_speed);
         }
 
     private:

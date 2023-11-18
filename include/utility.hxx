@@ -30,9 +30,17 @@ namespace rsim
     PARAM float START_Y = 724.0f;                 // px
     PARAM float START_ORIENTATION = -M_PI / 2.0f; // rad
 
+    PARAM float FAST_START_X = 224.0f;                // px
+    PARAM float FAST_START_Y = 320.0f;                // px
+    PARAM float FAST_START_ORIENTATION = M_PI / 2.0f; // rad
+
     PARAM float PIRATE_START_X = 320.0f;                // px
     PARAM float PIRATE_START_Y = 300.0f;                // px
     PARAM float PIRATE_START_ORIENTATION = M_PI / 2.0f; // rad
+
+    PARAM float SAFETY_CAR_START_X = 224.0f;                // px
+    PARAM float SAFETY_CAR_START_Y = 448.0f;                // px
+    PARAM float SAFETY_CAR_START_ORIENTATION = M_PI / 2.0f; // rad
 
     PARAM float SQUARE_LENGTH = 0.6; // m
 
@@ -111,15 +119,35 @@ namespace rsim
     namespace pmodel
     {
 
-        PARAM float Kp = 0.8f;     // -
-        PARAM float Ki = 0.01f;    // -
-        PARAM float Kd = 0.6f;     // -
+        PARAM float Kp = 1.0f;     // -
+        PARAM float Ki = 0.05f;    // -
+        PARAM float Kd = 0.025f;   // -
         PARAM float SPEED = 20.0f; // px/s
 
     } // namespace pmodel
 
     //
     //      END PIRATE MODEL
+    //
+    ///////////////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////////////////////////////////
+    //
+    //      SAFETY CAR MODEL
+    //
+
+    namespace scmodel
+    {
+
+        PARAM float Kp = 1.0f;     // -
+        PARAM float Ki = 0.05f;    // -
+        PARAM float Kd = 0.025f;   // -
+        PARAM float SPEED = 40.0f; // px/s
+
+    } // namespace pmodel
+
+    //
+    //      END SAFETY CAR MODEL
     //
     ///////////////////////////////////////////////////////////////////////////
 

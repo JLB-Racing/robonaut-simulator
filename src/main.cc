@@ -14,18 +14,24 @@
 
 int main(int, char **)
 {
-    rsim::Simulation simulation;
     float wheel_angle = 0.0f;
-    float velocity = m_to_px(0.0f);
+    float velocity = 0.0f;
 
-    [[maybe_unused]] auto x_t0 = px_to_m(rsim::START_X);
-    [[maybe_unused]] auto y_t0 = px_to_m(rsim::START_Y);
-    [[maybe_unused]] auto theta_t0 = rsim::START_ORIENTATION;
+    // rsim::Simulation simulation{rsim::START_X, rsim::START_Y, rsim::START_ORIENTATION};
+    // [[maybe_unused]] auto x_t0 = px_to_m(rsim::START_X);
+    // [[maybe_unused]] auto y_t0 = px_to_m(rsim::START_Y);
+    // [[maybe_unused]] auto theta_t0 = rsim::START_ORIENTATION;
+
+    rsim::Simulation simulation{rsim::FAST_START_X, rsim::FAST_START_Y, rsim::FAST_START_ORIENTATION};
+    [[maybe_unused]] auto x_t0 = px_to_m(rsim::FAST_START_X);
+    [[maybe_unused]] auto y_t0 = px_to_m(rsim::FAST_START_Y);
+    [[maybe_unused]] auto theta_t0 = rsim::FAST_START_ORIENTATION;
 
     /*===================================================*/
     /*      TODO: INITIALIZE YOUR LOGIC HERE             */
     /*                                                   */
-    jlb::Logic logic{jlb::Direction::RIGHT, x_t0, y_t0, theta_t0};
+    jlb::Logic logic{jlb::Direction::STRAIGHT, x_t0, y_t0, theta_t0};
+    logic.controller.mission = jlb::Mission::FAST;
     /*                                                   */
     /*===================================================*/
 
@@ -42,8 +48,6 @@ int main(int, char **)
                 velocity = target_speed;
                 /*                                                   */
                 /*===================================================*/
-
-                velocity = m_to_px(velocity);
 
                 std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 100 Hz
             }
@@ -74,6 +78,7 @@ int main(int, char **)
         {
             while (true)
             {
+                [[maybe_unused]] auto safety_car_range = simulation.car.detect_object(simulation.safety_car.state);
                 [[maybe_unused]] auto [detection_front, line_positions_front] = simulation.car.detect_front(simulation.map.data);
                 [[maybe_unused]] auto [detection_rear, line_positions_rear] = simulation.car.detect_rear(simulation.map.data);
                 [[maybe_unused]] auto under_gate = simulation.car_under_gate;
@@ -89,6 +94,7 @@ int main(int, char **)
                 for (auto &position : line_positions_rear)
                     position = position * jlb::SENSOR_WIDTH / jlb::SENSOR_COUNT;
 
+                logic.controller.set_object_range(safety_car_range);
                 logic.controller.set_detection_front(detection_front, line_positions_front);
                 logic.controller.set_detection_rear(detection_rear, line_positions_rear);
                 logic.set_under_gate(under_gate);
@@ -166,6 +172,16 @@ int main(int, char **)
         pirate_sprite.setTexture(pirate_texture);
         pirate_sprite.setOrigin(8.0f, 8.0f);
 
+        sf::Texture safety_car_texture;
+        if (!safety_car_texture.loadFromFile("assets/safety_car.png"))
+        {
+            std::cout << "Error loading assets/safety_car.png" << std::endl;
+            return EXIT_FAILURE;
+        }
+        sf::Sprite safety_car_sprite;
+        safety_car_sprite.setTexture(safety_car_texture);
+        safety_car_sprite.setOrigin(8.0f, 8.0f);
+
         /*===================================================*/
         /*      DRAW GUI                                     */
         /*===================================================*/
@@ -238,20 +254,20 @@ int main(int, char **)
             /*      CARS                                        */
             /*===================================================*/
 
-            float odom_x = m_to_px(0.0f);
-            float odom_y = m_to_px(0.0f);
+            float odom_x = 0.0f;
+            float odom_y = 0.0f;
             float odom_theta = 0.0f;
 
             /*===================================================*/
             /*      TODO: UPDATE ODOMETRY VISUALIZATION HERE     */
             /*                                                   */
-            odom_x = m_to_px(logic.odometry.x_t);
-            odom_y = m_to_px(logic.odometry.y_t);
+            odom_x = logic.odometry.x_t;
+            odom_y = logic.odometry.y_t;
             odom_theta = logic.odometry.theta_t;
             /*                                                   */
             /*===================================================*/
 
-            odom_sprite.setPosition(odom_x, odom_y);
+            odom_sprite.setPosition(m_to_px(odom_x), m_to_px(odom_y));
             odom_sprite.setRotation(odom_theta * 180 / M_PI + 90);
             window.draw(odom_sprite);
 
@@ -262,6 +278,10 @@ int main(int, char **)
             pirate_sprite.setPosition(simulation.pirate.state.x, simulation.pirate.state.y);
             pirate_sprite.setRotation(simulation.pirate.state.orientation * 180 / M_PI + 90);
             window.draw(pirate_sprite);
+
+            safety_car_sprite.setPosition(simulation.safety_car.state.x, simulation.safety_car.state.y);
+            safety_car_sprite.setRotation(simulation.safety_car.state.orientation * 180 / M_PI + 90);
+            window.draw(safety_car_sprite);
 
             window.display();
         }
