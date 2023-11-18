@@ -87,13 +87,6 @@ int main(int, char **)
                 /*===================================================*/
                 /*      TODO: UPDATE SENSOR LOGIC HERE               */
                 /*                                                   */
-
-                for (auto &position : line_positions_front)
-                    position = position * jlb::SENSOR_WIDTH / jlb::SENSOR_COUNT;
-
-                for (auto &position : line_positions_rear)
-                    position = position * jlb::SENSOR_WIDTH / jlb::SENSOR_COUNT;
-
                 logic.controller.set_object_range(safety_car_range);
                 logic.controller.set_detection_front(detection_front, line_positions_front);
                 logic.controller.set_detection_rear(detection_rear, line_positions_rear);
