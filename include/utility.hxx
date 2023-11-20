@@ -77,8 +77,22 @@ namespace rsim
 
     namespace vmodel
     {
+        PARAM float mu = 1.0f;
+        PARAM float m = 1.85f;
+        PARAM float g = 9.81f;
+        PARAM float h = 0.02f;
+        PARAM float lf = 0.133f;
+        PARAM float lr = 0.137f;
+        PARAM float Iz = 0.09f;
 
-        PARAM float MAX_WHEEL_ANGLE = 1.0f; // rad
+        PARAM float C_f = 30.0f;
+        PARAM float C_r = 40.0f;
+
+        PARAM float Cm1 = 41.7960f;
+        PARAM float Cm2 = 2.0152f;
+        PARAM float Cm3 = 0.4328f;
+
+        PARAM float MAX_WHEEL_ANGLE = 0.5f; // rad
         PARAM float MAX_VELOCITY = 500.0f;  // px/s
         PARAM float WHEELBASE = 16.0f;      // px
 
@@ -119,7 +133,7 @@ namespace rsim
     namespace pmodel
     {
 
-        PARAM float Kp = 1.0f;     // -
+        PARAM float Kp = 10.0f;    // -
         PARAM float Ki = 0.05f;    // -
         PARAM float Kd = 0.025f;   // -
         PARAM float SPEED = 20.0f; // px/s
@@ -139,7 +153,7 @@ namespace rsim
     namespace scmodel
     {
 
-        PARAM float Kp = 1.0f;     // -
+        PARAM float Kp = 10.0f;    // -
         PARAM float Ki = 0.05f;    // -
         PARAM float Kd = 0.025f;   // -
         PARAM float SPEED = 40.0f; // px/s

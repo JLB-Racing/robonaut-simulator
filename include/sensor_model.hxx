@@ -2,6 +2,7 @@
 #define SENSOR_MODEL_HXX
 
 #include "vehicle_model.hxx"
+#include "utility.hxx"
 
 class Map;
 

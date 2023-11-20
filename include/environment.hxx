@@ -12,6 +12,7 @@
 
 #include "vehicle_model.hxx"
 #include "sensor_model.hxx"
+#include "utility.hxx"
 
 namespace rsim
 {

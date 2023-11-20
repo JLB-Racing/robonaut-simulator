@@ -25,7 +25,7 @@ namespace rsim
 
         Simulation(const float x_t_ = START_X, const float y_t_ = START_Y, const float theta_t_ = START_ORIENTATION) : car{x_t_, y_t_, theta_t_}, pirate{PIRATE_START_X, PIRATE_START_Y, PIRATE_START_ORIENTATION}, safety_car{SAFETY_CAR_START_X, SAFETY_CAR_START_Y, SAFETY_CAR_START_ORIENTATION} {}
 
-        void update(const float target_angle, const float target_speed)
+        void update([[maybe_unused]] const float target_angle, [[maybe_unused]] const float target_speed)
         {
             car_under_gate = false;
             car_at_cross_section = false;
@@ -109,13 +109,15 @@ namespace rsim
 
             car.update(target_angle, m_to_px(target_speed));
 
-            // pirate.detect_front(map.data);
-            // pirate_controller.update(pirate.line_sensor_front.get_detection(), pirate_under_gate, pirate_at_cross_section, pirate.state);
-            // pirate.update(pirate_controller.target_angle, pirate_controller.target_speed);
+            pirate.detect_front(map.data);
+            pirate_controller.update(pirate.line_sensor_front.get_detection(), pirate_under_gate, pirate_at_cross_section, pirate.state);
+            pirate.update(pirate_controller.target_angle, pirate_controller.target_speed);
 
             safety_car.detect_front(map.data);
             safety_car_controller.update(safety_car.line_sensor_front.get_detection());
             safety_car.update(safety_car_controller.target_angle, safety_car_controller.target_speed);
+
+            // std::cout << safety_car_controller.target_speed << "\t" << safety_car.state.velocity << std::endl;
         }
 
     private:

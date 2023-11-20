@@ -40,24 +40,6 @@ int main(int, char **)
         {
             while (true)
             {
-                /*===================================================*/
-                /*      TODO: UPDATE CONTROL LOGIC HERE              */
-                /*                                                   */
-                auto [target_angle, target_speed] = logic.update();
-                wheel_angle = target_angle;
-                velocity = target_speed;
-                /*                                                   */
-                /*===================================================*/
-
-                std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 100 Hz
-            }
-        });
-
-    std::thread thread_sensors_high(
-        [&]()
-        {
-            while (true)
-            {
                 [[maybe_unused]] auto motor_rpm = simulation.car.noisy_motor_rpm();
                 [[maybe_unused]] auto yaw_rate = simulation.car.noisy_yaw_rate();
 
@@ -69,15 +51,6 @@ int main(int, char **)
                 /*                                                   */
                 /*===================================================*/
 
-                std::this_thread::sleep_for(std::chrono::milliseconds(5)); // 200 Hz
-            }
-        });
-
-    std::thread thread_sensors_low(
-        [&]()
-        {
-            while (true)
-            {
                 [[maybe_unused]] auto safety_car_range = simulation.car.detect_object(simulation.safety_car.state);
                 [[maybe_unused]] auto [detection_front, line_positions_front] = simulation.car.detect_front(simulation.map.data);
                 [[maybe_unused]] auto [detection_rear, line_positions_rear] = simulation.car.detect_rear(simulation.map.data);
@@ -95,7 +68,18 @@ int main(int, char **)
                 /*                                                   */
                 /*===================================================*/
 
-                std::this_thread::sleep_for(std::chrono::milliseconds(25)); // 40 Hz
+                /*===================================================*/
+                /*      TODO: UPDATE CONTROL LOGIC HERE              */
+                /*                                                   */
+                auto [target_angle, target_speed] = logic.update();
+                wheel_angle = target_angle;
+                velocity = target_speed;
+                /*                                                   */
+                /*===================================================*/
+
+                simulation.update(wheel_angle, velocity);
+
+                std::this_thread::sleep_for(std::chrono::milliseconds(1)); // 200 Hz
             }
         });
 
@@ -106,16 +90,6 @@ int main(int, char **)
             {
                 logic.signal_sender.send_telemetry();
                 std::this_thread::sleep_for(std::chrono::milliseconds(100)); // 10 Hz
-            }
-        });
-
-    std::thread thread_simulation(
-        [&]()
-        {
-            while (true)
-            {
-                simulation.update(wheel_angle, velocity);
-                std::this_thread::sleep_for(std::chrono::milliseconds(33)); // 30Hz
             }
         });
 
@@ -286,10 +260,7 @@ int main(int, char **)
     ///////////////////////////////////////////////////////////////////////////
 
     thread_control.join();
-    thread_sensors_high.join();
-    thread_sensors_low.join();
     thread_visualization.join();
-    thread_simulation.join();
 
     return EXIT_SUCCESS;
 }

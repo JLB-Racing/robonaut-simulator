@@ -6,6 +6,8 @@
 #include <tuple>
 #include <algorithm>
 
+#include "utility.hxx"
+
 namespace rsim
 {
     namespace scmodel
