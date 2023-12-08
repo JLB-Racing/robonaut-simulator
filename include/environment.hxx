@@ -12,10 +12,10 @@
 
 #include "vehicle_model.hxx"
 #include "sensor_model.hxx"
+#include "utility.hxx"
 
 namespace rsim
 {
-
     namespace env
     {
         class Bitmap
@@ -184,11 +184,21 @@ namespace rsim
             Gate(float x_, float y_) : x{x_}, y{y_} {}
         };
 
+        class CrossSection
+        {
+        public:
+            float x;
+            float y;
+
+            CrossSection(float x_, float y_) : x{x_}, y{y_} {}
+        };
+
         class Map
         {
         public:
             bool data[MAP_WIDTH][MAP_HEIGHT];
             std::vector<Gate> gates;
+            std::vector<CrossSection> cross_sections;
 
             Map()
             {
@@ -196,10 +206,10 @@ namespace rsim
                     for (unsigned long row = 0; row < MAP_HEIGHT; row++)
                         data[col][row] = true;
 
-                build_grid();
-                build_gates();
+                build_grid_R();
+                build_gates_R();
+                build_cross_sections_R();
 
-                // iterate over grid and fill in data indexing is [col][row]
                 for (unsigned gcol = 0; gcol < GRID_WIDTH; gcol++)
                     for (unsigned grow = 0; grow < GRID_HEIGHT; grow++)
                         for (unsigned bcol = 0; bcol < BITMAP_SIZE; bcol++)
@@ -263,7 +273,7 @@ namespace rsim
                 map_file.close();
             }
 
-            void build_grid()
+            void build_grid_R()
             {
 
                 auto copy = Bitmap{};
@@ -416,7 +426,7 @@ namespace rsim
                 copy.flip_vertical();
                 grid[3][7] = std::move(copy);
 
-                copy = turn_line_wide;
+                copy = turn_line2_wide;
                 copy.rotate90();
                 grid[4][7] = std::move(copy);
 
@@ -452,7 +462,7 @@ namespace rsim
                 copy = line_dotted;
                 grid[3][8] = std::move(copy);
 
-                copy = turn_line_wide;
+                copy = turn_line2_wide;
                 copy.flip_vertical();
                 copy.rotate270();
                 grid[4][8] = std::move(copy);
@@ -609,7 +619,7 @@ namespace rsim
                 grid[15][14] = std::move(copy);
             }
 
-            void build_gates()
+            void build_gates_R()
             {
                 gates.push_back(Gate(384.0f, 384.0f));
                 gates.push_back(Gate(512.0f, 384.0f));
@@ -632,8 +642,25 @@ namespace rsim
                 gates.push_back(Gate(384.0f, 640.0f));
                 gates.push_back(Gate(512.0f, 640.0f));
                 gates.push_back(Gate(640.0f, 640.0f));
+            }
 
-                gates.push_back(Gate(320.0f, 704.0f));
+            void build_cross_sections_R()
+            {
+                cross_sections.push_back(CrossSection(320.0f, 320.0f));
+
+                cross_sections.push_back(CrossSection(320.0f, 384.0f));
+
+                cross_sections.push_back(CrossSection(256.0f, 448.0f));
+
+                cross_sections.push_back(CrossSection(320.0f, 512.0f));
+                cross_sections.push_back(CrossSection(448.0f, 512.0f));
+                cross_sections.push_back(CrossSection(576.0f, 512.0f));
+
+                cross_sections.push_back(CrossSection(256.0f, 576.0f));
+
+                cross_sections.push_back(CrossSection(320.0f, 640.0f));
+
+                cross_sections.push_back(CrossSection(320.0f, 704.0f));
             }
         };
 
@@ -643,8 +670,9 @@ namespace rsim
             vmodel::State state;
             smodel::LineSensor line_sensor_front;
             smodel::LineSensor line_sensor_rear;
+            smodel::ObjectSensor object_sensor;
 
-            Car(float x_, float y_, float orientation_) : state{x_, y_, orientation_}, line_sensor_front{state}, line_sensor_rear{state}
+            Car(float x_, float y_, float orientation_) : state{x_, y_, orientation_}, line_sensor_front{state}, line_sensor_rear{state}, object_sensor{state}
             {
             }
 
@@ -657,18 +685,33 @@ namespace rsim
                 state.update(wheel_angle, velocity, dt);
                 line_sensor_front.update(state);
                 line_sensor_rear.update(state);
+                object_sensor.update(state);
             }
 
             template <size_t cols, size_t rows>
-            bool (&detect_front(bool (&map)[cols][rows]))[smodel::SENSOR_COUNT]
+            smodel::SensorDetection detect_front(bool (&map)[cols][rows])
             {
-                return line_sensor_front.detect(map, 8);
+                auto detection = line_sensor_front.detect(map, 8);
+                for (auto &line : detection.line_positions)
+                    line = px_to_m(line);
+                return detection;
             }
 
             template <size_t cols, size_t rows>
-            bool (&detect_rear(bool (&map)[cols][rows]))[smodel::SENSOR_COUNT]
+            smodel::SensorDetection detect_rear(bool (&map)[cols][rows])
             {
-                return line_sensor_rear.detect(map, -7);
+                auto detection = line_sensor_rear.detect(map, -7);
+                for (auto &line : detection.line_positions)
+                    line = px_to_m(line);
+                return detection;
+            }
+
+            float detect_object(vmodel::State object_)
+            {
+                auto distance = px_to_m(object_sensor.detect(object_));
+                if (distance > 2.0f)
+                    distance = 2.0f;
+                return distance;
             }
 
             float noisy_motor_rpm()

@@ -24,13 +24,23 @@ namespace rsim
     //      SIMULATION
     //
 
+    PARAM bool RUN_HEADLESS = false; // -
+
     PARAM float START_X = 320.0f;                 // px
     PARAM float START_Y = 724.0f;                 // px
     PARAM float START_ORIENTATION = -M_PI / 2.0f; // rad
 
+    PARAM float FAST_START_X = 224.0f;                // px
+    PARAM float FAST_START_Y = 320.0f;                // px
+    PARAM float FAST_START_ORIENTATION = M_PI / 2.0f; // rad
+
     PARAM float PIRATE_START_X = 320.0f;                // px
     PARAM float PIRATE_START_Y = 300.0f;                // px
     PARAM float PIRATE_START_ORIENTATION = M_PI / 2.0f; // rad
+
+    PARAM float SAFETY_CAR_START_X = 224.0f;                // px
+    PARAM float SAFETY_CAR_START_Y = 448.0f;                // px
+    PARAM float SAFETY_CAR_START_ORIENTATION = M_PI / 2.0f; // rad
 
     PARAM float SQUARE_LENGTH = 0.6; // m
 
@@ -67,8 +77,22 @@ namespace rsim
 
     namespace vmodel
     {
+        PARAM float mu = 1.0f;
+        PARAM float m = 1.85f;
+        PARAM float g = 9.81f;
+        PARAM float h = 0.02f;
+        PARAM float lf = 0.133f;
+        PARAM float lr = 0.137f;
+        PARAM float Iz = 0.09f;
 
-        PARAM float MAX_WHEEL_ANGLE = 1.0f; // rad
+        PARAM float C_f = 30.0f;
+        PARAM float C_r = 40.0f;
+
+        PARAM float Cm1 = 41.7960f;
+        PARAM float Cm2 = 2.0152f;
+        PARAM float Cm3 = 0.4328f;
+
+        PARAM float MAX_WHEEL_ANGLE = 0.5f; // rad
         PARAM float MAX_VELOCITY = 500.0f;  // px/s
         PARAM float WHEELBASE = 16.0f;      // px
 
@@ -77,8 +101,7 @@ namespace rsim
 
         PARAM float YAW_RATE_NOISE = 0.1f;   // rad/s
         PARAM float MOTOR_RPM_NOISE = 20.0f; // rpm
-
-    } // namespace vmodel
+    }                                        // namespace vmodel
 
     //
     //      END VEHICLE MODEL
@@ -93,7 +116,7 @@ namespace rsim
     namespace smodel
     {
 
-        PARAM int SENSOR_COUNT = 8; // -
+        PARAM int SENSOR_COUNT = 16; // -
 
     } // namespace smodel
 
@@ -110,15 +133,35 @@ namespace rsim
     namespace pmodel
     {
 
-        PARAM float Kp = 0.8f;     // -
-        PARAM float Ki = 0.01f;    // -
-        PARAM float Kd = 0.6f;     // -
+        PARAM float Kp = 10.0f;    // -
+        PARAM float Ki = 0.05f;    // -
+        PARAM float Kd = 0.025f;   // -
         PARAM float SPEED = 20.0f; // px/s
 
     } // namespace pmodel
 
     //
     //      END PIRATE MODEL
+    //
+    ///////////////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////////////////////////////////
+    //
+    //      SAFETY CAR MODEL
+    //
+
+    namespace scmodel
+    {
+
+        PARAM float Kp = 10.0f;    // -
+        PARAM float Ki = 0.05f;    // -
+        PARAM float Kd = 0.025f;   // -
+        PARAM float SPEED = 40.0f; // px/s
+
+    } // namespace pmodel
+
+    //
+    //      END SAFETY CAR MODEL
     //
     ///////////////////////////////////////////////////////////////////////////
 
