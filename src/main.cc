@@ -1,7 +1,6 @@
+#include <SFML/Graphics.hpp>
 #include <iostream>
 #include <thread>
-
-#include <SFML/Graphics.hpp>
 
 #include "simulation.hxx"
 
@@ -15,23 +14,23 @@
 int main(int, char **)
 {
     float wheel_angle = 0.0f;
-    float velocity = 0.0f;
+    float velocity    = 0.0f;
 
     // rsim::Simulation simulation{rsim::START_X, rsim::START_Y, rsim::START_ORIENTATION};
     // [[maybe_unused]] auto x_t0 = px_to_m(rsim::START_X);
     // [[maybe_unused]] auto y_t0 = px_to_m(rsim::START_Y);
     // [[maybe_unused]] auto theta_t0 = rsim::START_ORIENTATION;
 
-    rsim::Simulation simulation{rsim::FAST_START_X, rsim::FAST_START_Y, rsim::FAST_START_ORIENTATION};
-    [[maybe_unused]] auto x_t0 = px_to_m(rsim::FAST_START_X);
-    [[maybe_unused]] auto y_t0 = px_to_m(rsim::FAST_START_Y);
+    rsim::Simulation      simulation{rsim::FAST_START_X, rsim::FAST_START_Y, rsim::FAST_START_ORIENTATION};
+    [[maybe_unused]] auto x_t0     = px_to_m(rsim::FAST_START_X);
+    [[maybe_unused]] auto y_t0     = px_to_m(rsim::FAST_START_Y);
     [[maybe_unused]] auto theta_t0 = rsim::FAST_START_ORIENTATION;
 
     /*===================================================*/
     /*      TODO: INITIALIZE YOUR LOGIC HERE             */
     /*                                                   */
     jlb::Logic logic{jlb::Direction::STRAIGHT, x_t0, y_t0, theta_t0};
-    logic.controller.mission = jlb::Mission::FAST;
+    logic.set_states({jlb::FastState::OUT_ACCEL_ZONE});
     /*                                                   */
     /*===================================================*/
 
@@ -40,31 +39,24 @@ int main(int, char **)
         {
             while (true)
             {
-                [[maybe_unused]] auto motor_rpm = simulation.car.noisy_motor_rpm();
-                [[maybe_unused]] auto yaw_rate = simulation.car.noisy_yaw_rate();
-
-                /*===================================================*/
-                /*      TODO: UPDATE SENSOR LOGIC HERE               */
-                /*                                                   */
-                logic.odometry.imu_callback(yaw_rate);
-                logic.odometry.rpm_callback(motor_rpm);
-                /*                                                   */
-                /*===================================================*/
-
-                [[maybe_unused]] auto safety_car_range = simulation.car.detect_object(simulation.safety_car.state);
+                [[maybe_unused]] auto motor_rpm                               = simulation.car.noisy_motor_rpm();
+                [[maybe_unused]] auto yaw_rate                                = simulation.car.noisy_yaw_rate();
+                [[maybe_unused]] auto safety_car_range                        = simulation.car.detect_object(simulation.safety_car.state);
                 [[maybe_unused]] auto [detection_front, line_positions_front] = simulation.car.detect_front(simulation.map.data);
-                [[maybe_unused]] auto [detection_rear, line_positions_rear] = simulation.car.detect_rear(simulation.map.data);
-                [[maybe_unused]] auto under_gate = simulation.car_under_gate;
-                [[maybe_unused]] auto at_cross_section = simulation.car_at_cross_section;
+                [[maybe_unused]] auto [detection_rear, line_positions_rear]   = simulation.car.detect_rear(simulation.map.data);
+                [[maybe_unused]] auto under_gate                              = simulation.car_under_gate;
+                [[maybe_unused]] auto at_cross_section                        = simulation.car_at_cross_section;
 
                 /*===================================================*/
                 /*      TODO: UPDATE SENSOR LOGIC HERE               */
                 /*                                                   */
-                logic.controller.set_object_range(safety_car_range);
-                logic.controller.set_detection_front(detection_front, line_positions_front);
-                logic.controller.set_detection_rear(detection_rear, line_positions_rear);
+                // logic.controller.set_object_range(safety_car_range);
+                logic.set_detection_front(detection_front, line_positions_front);
+                logic.set_detection_rear(detection_rear, line_positions_rear);
                 logic.set_under_gate(under_gate);
                 logic.set_at_cross_section(at_cross_section);
+                logic.imu_callback(yaw_rate);
+                logic.rpm_callback(motor_rpm);
                 /*                                                   */
                 /*===================================================*/
 
@@ -72,14 +64,14 @@ int main(int, char **)
                 /*      TODO: UPDATE CONTROL LOGIC HERE              */
                 /*                                                   */
                 auto [target_angle, target_speed] = logic.update();
-                wheel_angle = target_angle;
-                velocity = target_speed;
+                wheel_angle                       = target_angle;
+                velocity                          = target_speed;
                 /*                                                   */
                 /*===================================================*/
 
                 simulation.update(wheel_angle, velocity);
 
-                std::this_thread::sleep_for(std::chrono::milliseconds(1)); // 200 Hz
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));  // 200 Hz
             }
         });
 
@@ -88,8 +80,8 @@ int main(int, char **)
         {
             while (true)
             {
-                logic.signal_sender.send_telemetry();
-                std::this_thread::sleep_for(std::chrono::milliseconds(100)); // 10 Hz
+                logic.send_telemetry();
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));  // 10 Hz
             }
         });
 
@@ -100,7 +92,6 @@ int main(int, char **)
 
     if (!rsim::RUN_HEADLESS)
     {
-
         sf::RenderWindow window(sf::VideoMode(rsim::env::MAP_WIDTH, rsim::env::MAP_HEIGHT), "RobonAUT Simulator");
         window.setPosition(sf::Vector2i(500, 50));
         window.setFramerateLimit(60);
@@ -158,8 +149,7 @@ int main(int, char **)
             sf::Event event;
             while (window.pollEvent(event))
             {
-                if (event.type == sf::Event::Closed)
-                    window.close();
+                if (event.type == sf::Event::Closed) window.close();
             }
 
             window.clear(sf::Color::White);
@@ -173,18 +163,18 @@ int main(int, char **)
                 sf::CircleShape circle(8);
                 switch (gate.state)
                 {
-                case rsim::env::Gate::State::UNMAPPED:
-                    circle.setFillColor(sf::Color(200, 200, 200));
-                    break;
-                case rsim::env::Gate::State::STOLEN_ONCE:
-                    circle.setFillColor(sf::Color::Yellow);
-                    break;
-                case rsim::env::Gate::State::STOLEN_TWICE:
-                    circle.setFillColor(sf::Color::Red);
-                    break;
-                case rsim::env::Gate::State::MAPPED:
-                    circle.setFillColor(sf::Color::Green);
-                    break;
+                    case rsim::env::Gate::State::UNMAPPED:
+                        circle.setFillColor(sf::Color(200, 200, 200));
+                        break;
+                    case rsim::env::Gate::State::STOLEN_ONCE:
+                        circle.setFillColor(sf::Color::Yellow);
+                        break;
+                    case rsim::env::Gate::State::STOLEN_TWICE:
+                        circle.setFillColor(sf::Color::Red);
+                        break;
+                    case rsim::env::Gate::State::MAPPED:
+                        circle.setFillColor(sf::Color::Green);
+                        break;
                 }
 
                 circle.setPosition(gate.x - 8, gate.y - 8);
@@ -221,16 +211,17 @@ int main(int, char **)
             /*      CARS                                        */
             /*===================================================*/
 
-            float odom_x = 0.0f;
-            float odom_y = 0.0f;
+            float odom_x     = 0.0f;
+            float odom_y     = 0.0f;
             float odom_theta = 0.0f;
 
             /*===================================================*/
             /*      TODO: UPDATE ODOMETRY VISUALIZATION HERE     */
             /*                                                   */
-            odom_x = logic.odometry.x_t;
-            odom_y = logic.odometry.y_t;
-            odom_theta = logic.odometry.theta_t;
+            auto [vx_t, x_t, y_t, theta_t] = logic.get_odometry();
+            odom_x                         = x_t;
+            odom_y                         = y_t;
+            odom_theta                     = theta_t;
             /*                                                   */
             /*===================================================*/
 

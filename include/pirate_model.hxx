@@ -1,10 +1,10 @@
 #ifndef PIRATE_MODEL_HXX
 #define PIRATE_MODEL_HXX
 
-#include <string>
-#include <vector>
-#include <tuple>
 #include <algorithm>
+#include <string>
+#include <tuple>
+#include <vector>
 
 #include "utility.hxx"
 
@@ -21,27 +21,24 @@ namespace rsim
 
         struct Edge
         {
-            char node;
-            Direction direction;
+            char              node;
+            Direction         direction;
             std::vector<char> prev_nodes;
-            float weight;
+            float             weight;
         };
 
         class Node
         {
         public:
-            char name;
-            float x;
-            float y;
+            char              name;
+            float             x;
+            float             y;
             std::vector<Edge> edges;
 
             Node(char name_, float x_, float y_) : name{name_}, x(x_), y(y_) {}
             ~Node() {}
 
-            void add_edge(char name_, Direction direction_, std::vector<char> prev_nodes_, float weight_ = 0.0f)
-            {
-                edges.push_back(Edge{name_, direction_, prev_nodes_, weight_});
-            }
+            void add_edge(char name_, Direction direction_, std::vector<char> prev_nodes_, float weight_ = 0.0f) { edges.push_back(Edge{name_, direction_, prev_nodes_, weight_}); }
         };
 
         class Graph
@@ -76,7 +73,7 @@ namespace rsim
                 nodes.push_back(Node{static_cast<char>('W'), 256, 576});
                 nodes.push_back(Node{static_cast<char>('X'), 96, 448});
 
-                const auto UNIT = 64;
+                const auto UNIT           = 64;
                 const auto QUARTER_CIRCLE = 2 * UNIT * M_PI / 4.0f;
 
                 this->operator[]('A').add_edge('C', Direction::LEFT, {'B', 'D'}, QUARTER_CIRCLE);
@@ -178,11 +175,9 @@ namespace rsim
             // Node& get_node(std::string name)
             Node &operator[](char name)
             {
-                if (nodes.empty())
-                    throw std::runtime_error("Graph is empty");
+                if (nodes.empty()) throw std::runtime_error("Graph is empty");
 
-                if (name < 'A' || name > 'X')
-                    throw std::runtime_error("Invalid node name");
+                if (name < 'A' || name > 'X') throw std::runtime_error("Invalid node name");
 
                 return nodes[static_cast<int>(name - 'A')];
             }
@@ -191,9 +186,9 @@ namespace rsim
         class PirateController
         {
         public:
-            unsigned long selected = 0;
-            float target_angle = 0.0f;
-            float target_speed = 0.0f;
+            unsigned long selected     = 0;
+            float         target_angle = 0.0f;
+            float         target_speed = 0.0f;
 
             Direction direction;
 
@@ -215,17 +210,17 @@ namespace rsim
 
                 switch (direction)
                 {
-                case Direction::LEFT:
-                    std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: left" << std::endl;
-                    break;
-                case Direction::RIGHT:
-                    std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: right" << std::endl;
-                    break;
-                case Direction::STRAIGHT:
-                    std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: straight" << std::endl;
-                    break;
-                default:
-                    break;
+                    case Direction::LEFT:
+                        std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: left" << std::endl;
+                        break;
+                    case Direction::RIGHT:
+                        std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: right" << std::endl;
+                        break;
+                    case Direction::STRAIGHT:
+                        std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: straight" << std::endl;
+                        break;
+                    default:
+                        break;
                 }
             }
 
@@ -242,32 +237,25 @@ namespace rsim
             template <size_t cols>
             void lateral_control(bool (&detection_)[cols])
             {
-                if (std::all_of(std::begin(detection_), std::end(detection_), [](bool b)
-                                { return b; }))
-                {
-                    return;
-                }
+                if (std::all_of(std::begin(detection_), std::end(detection_), [](bool b) { return b; })) { return; }
 
-                auto control_timestamp_ = std::chrono::steady_clock::now();
-                float dt = std::chrono::duration_cast<std::chrono::milliseconds>(control_timestamp_ - prev_control_timestamp_).count() / 1000.0f;
-                prev_control_timestamp_ = control_timestamp_;
+                auto  control_timestamp_ = std::chrono::steady_clock::now();
+                float dt                 = std::chrono::duration_cast<std::chrono::milliseconds>(control_timestamp_ - prev_control_timestamp_).count() / 1000.0f;
+                prev_control_timestamp_  = control_timestamp_;
 
                 unsigned long sensor_center = cols / 2;
 
                 unsigned long rightmost = 0;
                 for (unsigned long i = 0; i < cols; i++)
-                    if (!detection_[i] && i > rightmost)
-                        rightmost = i;
+                    if (!detection_[i] && i > rightmost) rightmost = i;
 
                 unsigned long leftmost = cols;
                 for (unsigned long i = 0; i < cols; i++)
-                    if (!detection_[i] && i < leftmost)
-                        leftmost = i;
+                    if (!detection_[i] && i < leftmost) leftmost = i;
 
                 unsigned long center = leftmost;
                 for (unsigned long i = leftmost; i <= rightmost; i++)
-                    if (!detection_[i] && std::abs(static_cast<int>(i - (rightmost + leftmost) / 2)) < std::abs(static_cast<int>(center - (rightmost + leftmost) / 2)))
-                        center = i;
+                    if (!detection_[i] && std::abs(static_cast<int>(i - (rightmost + leftmost) / 2)) < std::abs(static_cast<int>(center - (rightmost + leftmost) / 2))) center = i;
 
                 // instead find the closest to the sensor center
                 // unsigned long center = leftmost;
@@ -275,23 +263,17 @@ namespace rsim
                 //     if (!detection_[i] && std::abs(static_cast<int>(i - sensor_center)) < std::abs(static_cast<int>(center - sensor_center)))
                 //         center = i;
 
-                if (direction == Direction::LEFT)
-                    selected = leftmost;
-                if (direction == Direction::RIGHT)
-                    selected = rightmost;
-                if (direction == Direction::STRAIGHT)
-                    selected = center;
+                if (direction == Direction::LEFT) selected = leftmost;
+                if (direction == Direction::RIGHT) selected = rightmost;
+                if (direction == Direction::STRAIGHT) selected = center;
 
-                float error = (static_cast<int>(selected - sensor_center)) / static_cast<float>(sensor_center);
+                float error  = (static_cast<int>(selected - sensor_center)) / static_cast<float>(sensor_center);
                 target_angle = PID(error, dt);
 
                 prev_error = error;
             }
 
-            void longitudinal_control()
-            {
-                target_speed = SPEED;
-            }
+            void longitudinal_control() { target_speed = SPEED; }
 
             template <size_t cols>
             void update(bool (&detection_)[cols], [[maybe_unused]] bool under_gate_, [[maybe_unused]] bool at_cross_section_, [[maybe_unused]] vmodel::State state_)
@@ -307,38 +289,33 @@ namespace rsim
                         while (true)
                         {
                             unsigned long num_neighbors = graph[at_node].edges.size();
-                            auto selected_edge = rand() % num_neighbors;
+                            auto          selected_edge = rand() % num_neighbors;
 
-                            if (graph[at_node].edges[selected_edge].node == 'P' ||
-                                graph[at_node].edges[selected_edge].node == 'U' ||
-                                graph[at_node].edges[selected_edge].node == 'X')
-                            {
-                                continue;
-                            }
+                            if (graph[at_node].edges[selected_edge].node == 'P' || graph[at_node].edges[selected_edge].node == 'U' || graph[at_node].edges[selected_edge].node == 'X') { continue; }
 
                             auto prev_nodes = graph[at_node].edges[selected_edge].prev_nodes;
                             if (std::find(prev_nodes.begin(), prev_nodes.end(), current_node) != prev_nodes.end())
                             {
-                                next_node = graph[at_node].edges[selected_edge].node;
+                                next_node    = graph[at_node].edges[selected_edge].node;
                                 current_node = at_node;
-                                direction = graph[at_node].edges[selected_edge].direction;
+                                direction    = graph[at_node].edges[selected_edge].direction;
                                 break;
                             }
                         }
 
                         switch (direction)
                         {
-                        case Direction::LEFT:
-                            std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: left" << std::endl;
-                            break;
-                        case Direction::RIGHT:
-                            std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: right" << std::endl;
-                            break;
-                        case Direction::STRAIGHT:
-                            std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: straight" << std::endl;
-                            break;
-                        default:
-                            break;
+                            case Direction::LEFT:
+                                std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: left" << std::endl;
+                                break;
+                            case Direction::RIGHT:
+                                std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: right" << std::endl;
+                                break;
+                            case Direction::STRAIGHT:
+                                std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: straight" << std::endl;
+                                break;
+                            default:
+                                break;
                         }
                     }
                 }
@@ -350,9 +327,9 @@ namespace rsim
             }
 
         private:
-            float integral = 0.0f;
-            float prev_error = 0.0f;
-            bool prev_at_decision_point = false;
+            float integral               = 0.0f;
+            float prev_error             = 0.0f;
+            bool  prev_at_decision_point = false;
 
             std::chrono::time_point<std::chrono::steady_clock> prev_control_timestamp_ = std::chrono::steady_clock::now();
 
@@ -361,8 +338,8 @@ namespace rsim
             char current_node;
             char next_node;
         };
-    } // namespace pmodel
+    }  // namespace pmodel
 
-} // namespace rsim
+}  // namespace rsim
 
-#endif // PIRATE_MODEL_HXX
+#endif  // PIRATE_MODEL_HXX
