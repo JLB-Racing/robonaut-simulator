@@ -64,7 +64,12 @@
         "typeinfo": "cpp",
         "codecvt": "cpp",
         "numbers": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "strstream": "cpp",
+        "list": "cpp",
+        "cfenv": "cpp",
+        "typeindex": "cpp",
+        "variant": "cpp"
     },
     "ros.distro": "galactic"
 }

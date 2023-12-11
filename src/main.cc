@@ -50,7 +50,7 @@ int main(int, char **)
                 /*===================================================*/
                 /*      TODO: UPDATE SENSOR LOGIC HERE               */
                 /*                                                   */
-                // logic.controller.set_object_range(safety_car_range);
+                logic.set_object_range(safety_car_range);
                 logic.set_detection_front(detection_front, line_positions_front);
                 logic.set_detection_rear(detection_rear, line_positions_rear);
                 logic.set_under_gate(under_gate);
@@ -71,7 +71,7 @@ int main(int, char **)
 
                 simulation.update(wheel_angle, velocity);
 
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));  // 200 Hz
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));  // 200 Hz
             }
         });
 
