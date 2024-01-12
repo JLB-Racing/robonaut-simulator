@@ -1,18 +1,18 @@
 #ifndef ENVIRONMENT_HXX
 #define ENVIRONMENT_HXX
 
-#include <string>
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <bitset>
 #include <chrono>
 #include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
-#include "vehicle_model.hxx"
 #include "sensor_model.hxx"
 #include "utility.hxx"
+#include "vehicle_model.hxx"
 
 namespace rsim
 {
@@ -27,10 +27,7 @@ namespace rsim
             {
                 for (unsigned i = 0; i < BITMAP_SIZE; i++)
                 {
-                    for (unsigned j = 0; j < BITMAP_SIZE; j++)
-                    {
-                        bitmap[i][j] = true;
-                    }
+                    for (unsigned j = 0; j < BITMAP_SIZE; j++) { bitmap[i][j] = true; }
                 }
             }
 
@@ -46,8 +43,8 @@ namespace rsim
                 std::string binary;
                 std::getline(file, binary);
                 std::vector<uint8_t> data = std::vector<uint8_t>(binary.begin(), binary.end());
-                std::stringstream ss;
-                unsigned long header = 0;
+                std::stringstream    ss;
+                unsigned long        header = 0;
                 for (auto &byte : data)
                 {
                     if (header < 62)
@@ -60,9 +57,9 @@ namespace rsim
                 file.close();
 
                 // populate bitmap 64x64
-                std::string bits = ss.str();
-                unsigned long row = 0;
-                unsigned long col = 0;
+                std::string   bits = ss.str();
+                unsigned long row  = 0;
+                unsigned long col  = 0;
                 for (auto &bit : bits)
                 {
                     if (bit == '1')
@@ -87,27 +84,18 @@ namespace rsim
                 // Transpose
                 for (unsigned i = 0; i < BITMAP_SIZE; i++)
                 {
-                    for (unsigned j = 0; j < BITMAP_SIZE; j++)
-                    {
-                        rotated[i][j] = bitmap[j][i];
-                    }
+                    for (unsigned j = 0; j < BITMAP_SIZE; j++) { rotated[i][j] = bitmap[j][i]; }
                 }
 
                 // reversing each row
                 for (unsigned i = 0; i < BITMAP_SIZE; i++)
                 {
-                    for (unsigned j = 0, k = BITMAP_SIZE - 1; j < k; j++, k--)
-                    {
-                        std::swap(rotated[j][i], rotated[k][i]);
-                    }
+                    for (unsigned j = 0, k = BITMAP_SIZE - 1; j < k; j++, k--) { std::swap(rotated[j][i], rotated[k][i]); }
                 }
 
                 for (unsigned i = 0; i < BITMAP_SIZE; i++)
                 {
-                    for (unsigned j = 0; j < BITMAP_SIZE; j++)
-                    {
-                        bitmap[i][j] = rotated[i][j];
-                    }
+                    for (unsigned j = 0; j < BITMAP_SIZE; j++) { bitmap[i][j] = rotated[i][j]; }
                 }
             }
 
@@ -128,10 +116,7 @@ namespace rsim
             {
                 for (unsigned i = 0; i < BITMAP_SIZE; i++)
                 {
-                    for (unsigned j = 0, k = BITMAP_SIZE - 1; j < k; j++, k--)
-                    {
-                        std::swap(bitmap[j][i], bitmap[k][i]);
-                    }
+                    for (unsigned j = 0, k = BITMAP_SIZE - 1; j < k; j++, k--) { std::swap(bitmap[j][i], bitmap[k][i]); }
                 }
             }
 
@@ -139,10 +124,7 @@ namespace rsim
             {
                 for (unsigned i = 0; i < BITMAP_SIZE; i++)
                 {
-                    for (unsigned j = 0, k = BITMAP_SIZE - 1; j < k; j++, k--)
-                    {
-                        std::swap(bitmap[i][j], bitmap[i][k]);
-                    }
+                    for (unsigned j = 0, k = BITMAP_SIZE - 1; j < k; j++, k--) { std::swap(bitmap[i][j], bitmap[i][k]); }
                 }
             }
 
@@ -177,11 +159,12 @@ namespace rsim
             State state = State::UNMAPPED;
             float x;
             float y;
+            char  name;
 
             std::chrono::steady_clock::time_point last_seen;
             std::chrono::steady_clock::time_point last_stolen;
 
-            Gate(float x_, float y_) : x{x_}, y{y_} {}
+            Gate(float x_, float y_, char name_) : x{x_}, y{y_}, name{name_} {}
         };
 
         class CrossSection
@@ -189,22 +172,22 @@ namespace rsim
         public:
             float x;
             float y;
+            char  name;
 
-            CrossSection(float x_, float y_) : x{x_}, y{y_} {}
+            CrossSection(float x_, float y_, char name_) : x{x_}, y{y_}, name{name_} {}
         };
 
         class Map
         {
         public:
-            bool data[MAP_WIDTH][MAP_HEIGHT];
-            std::vector<Gate> gates;
+            bool                      data[MAP_WIDTH][MAP_HEIGHT];
+            std::vector<Gate>         gates;
             std::vector<CrossSection> cross_sections;
 
             Map()
             {
                 for (unsigned long col = 0; col < MAP_WIDTH; col++)
-                    for (unsigned long row = 0; row < MAP_HEIGHT; row++)
-                        data[col][row] = true;
+                    for (unsigned long row = 0; row < MAP_HEIGHT; row++) data[col][row] = true;
 
                 build_grid_R();
                 build_gates_R();
@@ -213,34 +196,33 @@ namespace rsim
                 for (unsigned gcol = 0; gcol < GRID_WIDTH; gcol++)
                     for (unsigned grow = 0; grow < GRID_HEIGHT; grow++)
                         for (unsigned bcol = 0; bcol < BITMAP_SIZE; bcol++)
-                            for (unsigned brow = 0; brow < BITMAP_SIZE; brow++)
-                                data[gcol * BITMAP_SIZE + bcol][grow * BITMAP_SIZE + brow] = grid[gcol][grow].bitmap[bcol][brow];
+                            for (unsigned brow = 0; brow < BITMAP_SIZE; brow++) data[gcol * BITMAP_SIZE + bcol][grow * BITMAP_SIZE + brow] = grid[gcol][grow].bitmap[bcol][brow];
 
                 serialize_map("competition.map");
             }
 
         private:
             Bitmap grid[GRID_WIDTH][GRID_HEIGHT] = {{env::Bitmap{}}};
-            Bitmap balancer = Bitmap("assets/balancer.bmp");
-            Bitmap start = Bitmap("assets/start.bmp");
-            Bitmap line = Bitmap("assets/line.bmp");
-            Bitmap line_dotted = Bitmap("assets/line-dotted.bmp");
-            Bitmap line_edge = Bitmap("assets/line-edge.bmp");
-            Bitmap line_triple = Bitmap("assets/line-triple.bmp");
-            Bitmap line_triple_half = Bitmap("assets/line-triple-half.bmp");
-            Bitmap line_triple_half_dotted = Bitmap("assets/line-triple-half-dotted.bmp");
-            Bitmap turn = Bitmap("assets/turn.bmp");
-            Bitmap turn2 = Bitmap("assets/turn-2.bmp");
-            Bitmap turn3 = Bitmap("assets/turn-3.bmp");
-            Bitmap turn_t = Bitmap("assets/turn-t.bmp");
-            Bitmap turn_half = Bitmap("assets/turn-half.bmp");
-            Bitmap turn_half_full = Bitmap("assets/turn-half-full.bmp");
-            Bitmap turn_line = Bitmap("assets/turn-line.bmp");
-            Bitmap turn_line2 = Bitmap("assets/turn-line-2.bmp");
-            Bitmap turn_line3 = Bitmap("assets/turn-line-3.bmp");
-            Bitmap turn_line_wide = Bitmap("assets/turn-line-wide.bmp");
-            Bitmap turn_line2_wide = Bitmap("assets/turn-line-2-wide.bmp");
-            Bitmap turn_line3_wide = Bitmap("assets/turn-line-3-wide.bmp");
+            Bitmap balancer                      = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/balancer.bmp");
+            Bitmap start                         = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/start.bmp");
+            Bitmap line                          = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/line.bmp");
+            Bitmap line_dotted                   = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/line-dotted.bmp");
+            Bitmap line_edge                     = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/line-edge.bmp");
+            Bitmap line_triple                   = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/line-triple.bmp");
+            Bitmap line_triple_half              = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/line-triple-half.bmp");
+            Bitmap line_triple_half_dotted       = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/line-triple-half-dotted.bmp");
+            Bitmap turn                          = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/turn.bmp");
+            Bitmap turn2                         = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/turn-2.bmp");
+            Bitmap turn3                         = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/turn-3.bmp");
+            Bitmap turn_t                        = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/turn-t.bmp");
+            Bitmap turn_half                     = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/turn-half.bmp");
+            Bitmap turn_half_full                = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/turn-half-full.bmp");
+            Bitmap turn_line                     = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/turn-line.bmp");
+            Bitmap turn_line2                    = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/turn-line-2.bmp");
+            Bitmap turn_line3                    = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/turn-line-3.bmp");
+            Bitmap turn_line_wide                = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/turn-line-wide.bmp");
+            Bitmap turn_line2_wide               = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/turn-line-2-wide.bmp");
+            Bitmap turn_line3_wide               = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/turn-line-3-wide.bmp");
 
             void serialize_map(const std::string &filename)
             {
@@ -275,7 +257,6 @@ namespace rsim
 
             void build_grid_R()
             {
-
                 auto copy = Bitmap{};
 
                 copy = turn_half;
@@ -291,7 +272,7 @@ namespace rsim
                 copy.flip_vertical();
                 grid[15][1] = std::move(copy);
 
-                copy = line;
+                copy        = line;
                 grid[13][2] = std::move(copy);
 
                 copy = line_triple_half;
@@ -341,10 +322,10 @@ namespace rsim
                 copy.flip_horizontal();
                 grid[12][3] = std::move(copy);
 
-                copy = turn_half;
+                copy        = turn_half;
                 grid[13][3] = std::move(copy);
 
-                copy = line_triple;
+                copy        = line_triple;
                 grid[15][3] = std::move(copy);
 
                 copy = line_triple_half_dotted;
@@ -360,17 +341,17 @@ namespace rsim
                 copy.flip_vertical();
                 grid[5][4] = std::move(copy);
 
-                copy = line_triple_half;
+                copy        = line_triple_half;
                 grid[15][4] = std::move(copy);
 
-                copy = line;
+                copy       = line;
                 grid[3][5] = std::move(copy);
 
                 copy = turn_line_wide;
                 copy.rotate90();
                 grid[5][5] = std::move(copy);
 
-                copy = line;
+                copy        = line;
                 grid[15][5] = std::move(copy);
 
                 copy = turn_half_full;
@@ -381,7 +362,7 @@ namespace rsim
                 copy.rotate90();
                 grid[2][6] = std::move(copy);
 
-                copy = turn_t;
+                copy       = turn_t;
                 grid[3][6] = std::move(copy);
 
                 copy = turn_line2_wide;
@@ -416,10 +397,10 @@ namespace rsim
                 copy.flip_vertical();
                 grid[10][6] = std::move(copy);
 
-                copy = line;
+                copy        = line;
                 grid[15][6] = std::move(copy);
 
-                copy = balancer;
+                copy       = balancer;
                 grid[1][7] = std::move(copy);
 
                 copy = line_dotted;
@@ -434,14 +415,14 @@ namespace rsim
                 copy.rotate90();
                 grid[5][7] = std::move(copy);
 
-                copy = turn_line;
+                copy       = turn_line;
                 grid[6][7] = std::move(copy);
 
                 copy = turn_line;
                 copy.rotate90();
                 grid[7][7] = std::move(copy);
 
-                copy = turn_line;
+                copy       = turn_line;
                 grid[8][7] = std::move(copy);
 
                 copy = turn_line;
@@ -453,13 +434,13 @@ namespace rsim
                 copy.rotate90();
                 grid[10][7] = std::move(copy);
 
-                copy = line;
+                copy        = line;
                 grid[15][7] = std::move(copy);
 
-                copy = balancer;
+                copy       = balancer;
                 grid[1][8] = std::move(copy);
 
-                copy = line_dotted;
+                copy       = line_dotted;
                 grid[3][8] = std::move(copy);
 
                 copy = turn_line2_wide;
@@ -494,7 +475,7 @@ namespace rsim
                 copy.rotate270();
                 grid[10][8] = std::move(copy);
 
-                copy = line;
+                copy        = line;
                 grid[15][8] = std::move(copy);
 
                 copy = line_triple_half;
@@ -509,27 +490,27 @@ namespace rsim
                 copy.rotate90();
                 grid[5][9] = std::move(copy);
 
-                copy = turn;
+                copy       = turn;
                 grid[6][9] = std::move(copy);
 
                 copy = turn2;
                 copy.rotate90();
                 grid[7][9] = std::move(copy);
 
-                copy = turn_line2_wide;
+                copy       = turn_line2_wide;
                 grid[8][9] = std::move(copy);
 
                 copy = turn_line3_wide;
                 copy.flip_horizontal();
                 grid[9][9] = std::move(copy);
 
-                copy = turn;
+                copy        = turn;
                 grid[10][9] = std::move(copy);
 
-                copy = line;
+                copy        = line;
                 grid[15][9] = std::move(copy);
 
-                copy = line_triple;
+                copy        = line_triple;
                 grid[3][10] = std::move(copy);
 
                 copy = turn_line_wide;
@@ -537,20 +518,20 @@ namespace rsim
                 copy.rotate90();
                 grid[5][10] = std::move(copy);
 
-                copy = line;
+                copy         = line;
                 grid[15][10] = std::move(copy);
 
-                copy = start;
+                copy        = start;
                 grid[4][11] = std::move(copy);
 
-                copy = line_triple_half;
+                copy        = line_triple_half;
                 grid[3][11] = std::move(copy);
 
                 copy = start;
                 copy.flip_horizontal();
                 grid[5][11] = std::move(copy);
 
-                copy = line;
+                copy         = line;
                 grid[15][11] = std::move(copy);
 
                 copy = turn_half;
@@ -598,13 +579,13 @@ namespace rsim
                 copy.flip_vertical();
                 grid[13][12] = std::move(copy);
 
-                copy = line;
+                copy         = line;
                 grid[15][12] = std::move(copy);
 
-                copy = line;
+                copy         = line;
                 grid[13][13] = std::move(copy);
 
-                copy = line_triple_half_dotted;
+                copy         = line_triple_half_dotted;
                 grid[15][13] = std::move(copy);
 
                 copy = turn_half;
@@ -615,72 +596,70 @@ namespace rsim
                 copy.rotate90();
                 grid[14][14] = std::move(copy);
 
-                copy = turn_half;
+                copy         = turn_half;
                 grid[15][14] = std::move(copy);
             }
 
             void build_gates_R()
             {
-                gates.push_back(Gate(384.0f, 384.0f));
-                gates.push_back(Gate(512.0f, 384.0f));
-                gates.push_back(Gate(640.0f, 384.0f));
+                gates.push_back(Gate(384.0f, 384.0f, 'M'));
+                gates.push_back(Gate(512.0f, 384.0f, 'H'));
+                gates.push_back(Gate(640.0f, 384.0f, 'C'));
 
-                gates.push_back(Gate(320.0f, 448.0f));
-                gates.push_back(Gate(448.0f, 448.0f));
-                gates.push_back(Gate(576.0f, 448.0f));
-                gates.push_back(Gate(704.0f, 448.0f));
+                gates.push_back(Gate(320.0f, 448.0f, 'R'));
+                gates.push_back(Gate(448.0f, 448.0f, 'K'));
+                gates.push_back(Gate(576.0f, 448.0f, 'F'));
+                gates.push_back(Gate(704.0f, 448.0f, 'A'));
 
-                gates.push_back(Gate(384.0f, 512.0f));
-                gates.push_back(Gate(512.0f, 512.0f));
-                gates.push_back(Gate(640.0f, 512.0f));
+                gates.push_back(Gate(384.0f, 512.0f, 'N'));
+                gates.push_back(Gate(512.0f, 512.0f, 'I'));
+                gates.push_back(Gate(640.0f, 512.0f, 'D'));
 
-                gates.push_back(Gate(320.0f, 576.0f));
-                gates.push_back(Gate(448.0f, 576.0f));
-                gates.push_back(Gate(576.0f, 576.0f));
-                gates.push_back(Gate(704.0f, 576.0f));
+                gates.push_back(Gate(320.0f, 576.0f, 'T'));
+                gates.push_back(Gate(448.0f, 576.0f, 'L'));
+                gates.push_back(Gate(576.0f, 576.0f, 'G'));
+                gates.push_back(Gate(704.0f, 576.0f, 'B'));
 
-                gates.push_back(Gate(384.0f, 640.0f));
-                gates.push_back(Gate(512.0f, 640.0f));
-                gates.push_back(Gate(640.0f, 640.0f));
+                gates.push_back(Gate(384.0f, 640.0f, 'O'));
+                gates.push_back(Gate(512.0f, 640.0f, 'J'));
+                gates.push_back(Gate(640.0f, 640.0f, 'E'));
             }
 
             void build_cross_sections_R()
             {
-                cross_sections.push_back(CrossSection(320.0f, 320.0f));
+                cross_sections.push_back(CrossSection(320.0f, 320.0f, 'P'));
 
-                cross_sections.push_back(CrossSection(320.0f, 384.0f));
+                cross_sections.push_back(CrossSection(320.0f, 384.0f, 'Q'));
 
-                cross_sections.push_back(CrossSection(256.0f, 448.0f));
+                cross_sections.push_back(CrossSection(256.0f, 448.0f, 'V'));
 
-                cross_sections.push_back(CrossSection(320.0f, 512.0f));
-                cross_sections.push_back(CrossSection(448.0f, 512.0f));
-                cross_sections.push_back(CrossSection(576.0f, 512.0f));
+                cross_sections.push_back(CrossSection(320.0f, 512.0f, 'S'));
+                cross_sections.push_back(CrossSection(448.0f, 512.0f, ' '));
+                cross_sections.push_back(CrossSection(576.0f, 512.0f, ' '));
 
-                cross_sections.push_back(CrossSection(256.0f, 576.0f));
+                cross_sections.push_back(CrossSection(256.0f, 576.0f, 'W'));
 
-                cross_sections.push_back(CrossSection(320.0f, 640.0f));
+                cross_sections.push_back(CrossSection(320.0f, 640.0f, ' '));
 
-                cross_sections.push_back(CrossSection(320.0f, 704.0f));
+                cross_sections.push_back(CrossSection(320.0f, 704.0f, 'U'));
             }
         };
 
         class Car
         {
         public:
-            vmodel::State state;
-            smodel::LineSensor line_sensor_front;
-            smodel::LineSensor line_sensor_rear;
+            vmodel::State        state;
+            smodel::LineSensor   line_sensor_front;
+            smodel::LineSensor   line_sensor_rear;
             smodel::ObjectSensor object_sensor;
 
-            Car(float x_, float y_, float orientation_) : state{x_, y_, orientation_}, line_sensor_front{state}, line_sensor_rear{state}, object_sensor{state}
-            {
-            }
+            Car(float x_, float y_, float orientation_) : state{x_, y_, orientation_}, line_sensor_front{state}, line_sensor_rear{state}, object_sensor{state} {}
 
             void update(float wheel_angle, float velocity)
             {
-                auto update_timestamp_ = std::chrono::steady_clock::now();
-                float dt = std::chrono::duration_cast<std::chrono::milliseconds>(update_timestamp_ - prev_update_timestamp_).count() / 1000.0f;
-                prev_update_timestamp_ = update_timestamp_;
+                auto  update_timestamp_ = std::chrono::steady_clock::now();
+                float dt                = std::chrono::duration_cast<std::chrono::milliseconds>(update_timestamp_ - prev_update_timestamp_).count() / 1000.0f;
+                prev_update_timestamp_  = update_timestamp_;
 
                 state.update(wheel_angle, velocity, dt);
                 line_sensor_front.update(state);
@@ -692,8 +671,7 @@ namespace rsim
             smodel::SensorDetection detect_front(bool (&map)[cols][rows])
             {
                 auto detection = line_sensor_front.detect(map, 8);
-                for (auto &line : detection.line_positions)
-                    line = px_to_m(line);
+                for (auto &line : detection.line_positions) line = px_to_m(line);
                 return detection;
             }
 
@@ -701,35 +679,27 @@ namespace rsim
             smodel::SensorDetection detect_rear(bool (&map)[cols][rows])
             {
                 auto detection = line_sensor_rear.detect(map, -7);
-                for (auto &line : detection.line_positions)
-                    line = px_to_m(line);
+                for (auto &line : detection.line_positions) line = px_to_m(line);
                 return detection;
             }
 
             float detect_object(vmodel::State object_)
             {
                 auto distance = px_to_m(object_sensor.detect(object_));
-                if (distance > 2.0f)
-                    distance = 2.0f;
+                if (distance > 2.0f) distance = 2.0f;
                 return distance;
             }
 
-            float noisy_motor_rpm()
-            {
-                return state.noisy_motor_rpm();
-            }
+            float noisy_motor_rpm() { return state.noisy_motor_rpm(); }
 
-            float noisy_yaw_rate()
-            {
-                return state.noisy_yaw_rate();
-            }
+            float noisy_yaw_rate() { return state.noisy_yaw_rate(); }
 
         private:
             std::chrono::time_point<std::chrono::steady_clock> prev_update_timestamp_ = std::chrono::steady_clock::now();
         };
 
-    } // namespace env
+    }  // namespace env
 
-} // namespace rsim
+}  // namespace rsim
 
-#endif // ENVIRONMENT_HXX
+#endif  // ENVIRONMENT_HXX

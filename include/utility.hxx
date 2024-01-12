@@ -38,6 +38,9 @@ namespace rsim
     PARAM float SAFETY_CAR_START_Y           = 448.0f;        // px
     PARAM float SAFETY_CAR_START_ORIENTATION = M_PI / 2.0f;   // rad
     PARAM float SQUARE_LENGTH                = 0.6;           // m
+    PARAM float BALANCER_END_CENTER_X        = 96.0f;         // px
+    PARAM float BALANCER_END_CENTER_Y        = 560.0f;        // px
+    PARAM float BALANCER_END_RADIUS          = 16.0f;         // px
 
     //
     //      END SIMULATION
