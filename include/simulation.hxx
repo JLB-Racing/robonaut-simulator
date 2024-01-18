@@ -19,13 +19,16 @@ namespace rsim
         pmodel::PirateController     pirate_controller;
         scmodel::SafetyCarController safety_car_controller;
 
-        int  collected_points     = 0;
-        bool car_under_gate       = false;
-        bool car_at_cross_section = false;
-        bool flood                = false;
+        int                     collected_points     = 0;
+        bool                    car_under_gate       = false;
+        bool                    car_at_cross_section = false;
+        bool                    flood                = false;
+        pmodel::PirateInterface pirate_interface;
 
         Simulation(const float x_t_ = START_X, const float y_t_ = START_Y, const float theta_t_ = START_ORIENTATION)
-            : car{x_t_, y_t_, theta_t_}, pirate{PIRATE_START_X, PIRATE_START_Y, PIRATE_START_ORIENTATION}, safety_car{SAFETY_CAR_START_X, SAFETY_CAR_START_Y, SAFETY_CAR_START_ORIENTATION}
+            : car{x_t_, y_t_, theta_t_},
+              pirate{PIRATE_START_X, PIRATE_START_Y, PIRATE_START_ORIENTATION},
+              safety_car{SAFETY_CAR_START_X, SAFETY_CAR_START_Y, SAFETY_CAR_START_ORIENTATION}
         {
         }
 
@@ -36,7 +39,10 @@ namespace rsim
             bool pirate_under_gate       = false;
             bool pirate_at_cross_section = false;
 
-            if (std::sqrt(std::pow(BALANCER_END_CENTER_X - car.state.x, 2) + std::pow(BALANCER_END_CENTER_Y - car.state.y, 2)) < BALANCER_END_RADIUS) { flood = false; }
+            if (std::sqrt(std::pow(BALANCER_END_CENTER_X - car.state.x, 2) + std::pow(BALANCER_END_CENTER_Y - car.state.y, 2)) < BALANCER_END_RADIUS)
+            {
+                flood = false;
+            }
 
             for (auto &gate : map.gates)
             {
@@ -103,15 +109,24 @@ namespace rsim
 
             for (auto &cross_section : map.cross_sections)
             {
-                if (std::sqrt(std::pow(cross_section.x - car.state.x, 2) + std::pow(cross_section.y - car.state.y, 2)) < 8.0f) { car_at_cross_section = true; }
+                if (std::sqrt(std::pow(cross_section.x - car.state.x, 2) + std::pow(cross_section.y - car.state.y, 2)) < 8.0f)
+                {
+                    car_at_cross_section = true;
+                }
 
-                if (std::sqrt(std::pow(cross_section.x - pirate.state.x, 2) + std::pow(cross_section.y - pirate.state.y, 2)) < 8.0f) { pirate_at_cross_section = true; }
+                if (std::sqrt(std::pow(cross_section.x - pirate.state.x, 2) + std::pow(cross_section.y - pirate.state.y, 2)) < 8.0f)
+                {
+                    pirate_at_cross_section = true;
+                }
             }
 
             car.update(target_angle, m_to_px(target_speed));
 
-            pirate.detect_front(map.data);
-            pirate_controller.update(pirate.line_sensor_front.get_detection(), pirate_under_gate, pirate_at_cross_section, pirate.state);
+            [[maybe_unused]] auto [detection_front, line_positions_front] = pirate.detect_front(map.data);
+            [[maybe_unused]] auto [detection_rear, line_positions_rear]   = pirate.detect_rear(map.data);
+            pirate_controller.set_detection_front(detection_front, line_positions_front);
+            pirate_controller.set_detection_rear(detection_rear, line_positions_rear);
+            pirate_interface = pirate_controller.update(pirate_under_gate, pirate_at_cross_section, pirate.state);
             pirate.update(pirate_controller.target_angle, pirate_controller.target_speed);
 
             safety_car.detect_front(map.data);

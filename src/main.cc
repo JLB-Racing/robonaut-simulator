@@ -51,6 +51,7 @@ int main(int, char **)
                 [[maybe_unused]] auto under_gate                              = simulation.car_under_gate;
                 [[maybe_unused]] auto at_cross_section                        = simulation.car_at_cross_section;
                 [[maybe_unused]] auto flood                                   = simulation.flood;
+                [[maybe_unused]] auto [prev_node, next_node, after_next_node, section_percentage] = simulation.pirate_interface;
 
                 /*===================================================*/
                 /*      TODO: UPDATE SENSOR LOGIC HERE               */
@@ -63,6 +64,7 @@ int main(int, char **)
                 logic.set_flood(flood);
                 logic.imu_callback(yaw_rate);
                 logic.rpm_callback(motor_rpm);
+                logic.pirate_callback(prev_node, next_node, after_next_node, section_percentage);
                 /*                                                   */
                 /*===================================================*/
 
@@ -157,8 +159,14 @@ int main(int, char **)
         /*      DRAW GUI                                     */
         /*===================================================*/
 
-        rsim::gui::Button floodButton(window, sf::Vector2f(10, 10), sf::Vector2f(50, 25), "Árvíz", font, 12, sf::Color::Black, sf::Color{200, 200, 200});
-        sf::Vector2f      mousePos;
+        rsim::gui::Button floodButton(
+            window, sf::Vector2f(10, 10), sf::Vector2f(100, 25), "     Flood      ", font, 12, sf::Color::Black, sf::Color{200, 200, 200});
+        rsim::gui::Button safetyCarStartButton(
+            window, sf::Vector2f(120, 10), sf::Vector2f(100, 25), "Safety Car start", font, 12, sf::Color::Black, sf::Color{200, 200, 200});
+        rsim::gui::Button safetyCarResetButton(
+            window, sf::Vector2f(120, 45), sf::Vector2f(100, 25), "Safety Car reset", font, 12, sf::Color::Black, sf::Color{200, 200, 200});
+
+        sf::Vector2f mousePos;
 
         while (window.isOpen())
         {
@@ -309,6 +317,8 @@ int main(int, char **)
             window.draw(safety_car_sprite);
 
             floodButton.draw();
+            safetyCarStartButton.draw();
+            safetyCarResetButton.draw();
 
             // bottom right corner display mouse position
             sf::Text mousePosText;

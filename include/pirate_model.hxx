@@ -12,6 +12,15 @@ namespace rsim
 {
     namespace pmodel
     {
+
+        struct PirateInterface
+        {
+            char previous_node;
+            char next_node;
+            char after_next_node;
+            int  section_percentage;
+        };
+
         enum class Direction
         {
             LEFT,
@@ -19,12 +28,32 @@ namespace rsim
             STRAIGHT,
         };
 
+        std::ostream &operator<<(std::ostream &os, const Direction &direction)
+        {
+            switch (direction)
+            {
+                case Direction::LEFT:
+                    os << "L";
+                    break;
+                case Direction::RIGHT:
+                    os << "R";
+                    break;
+                case Direction::STRAIGHT:
+                    os << "S";
+                    break;
+                default:
+                    os << "-";
+                    break;
+            }
+            return os;
+        }
+
         struct Edge
         {
             char              node;
             Direction         direction;
             std::vector<char> prev_nodes;
-            float             weight;
+            float             distance;
         };
 
         class Node
@@ -38,7 +67,10 @@ namespace rsim
             Node(char name_, float x_, float y_) : name{name_}, x(x_), y(y_) {}
             ~Node() {}
 
-            void add_edge(char name_, Direction direction_, std::vector<char> prev_nodes_, float weight_ = 0.0f) { edges.push_back(Edge{name_, direction_, prev_nodes_, weight_}); }
+            void add_edge(char name_, Direction direction_, std::vector<char> prev_nodes_, float weight_ = 0.0f)
+            {
+                edges.push_back(Edge{name_, direction_, prev_nodes_, weight_});
+            }
         };
 
         class Graph
@@ -186,42 +218,60 @@ namespace rsim
         class PirateController
         {
         public:
-            unsigned long selected     = 0;
-            float         target_angle = 0.0f;
-            float         target_speed = 0.0f;
+            unsigned long          selected_front           = smodel::SENSOR_COUNT / 2;
+            unsigned long          selected_rear            = smodel::SENSOR_COUNT / 2;
+            [[maybe_unused]] float line_position_front      = 0.0f;
+            [[maybe_unused]] float line_position_rear       = 0.0f;
+            [[maybe_unused]] float prev_line_position_front = 0.0f;
+            [[maybe_unused]] float prev_line_position_rear  = 0.0f;
+            float                  target_angle             = 0.0f;
+            float                  target_speed             = 0.0f;
 
-            Direction direction;
+            Direction previous_direction;
+            Direction next_direction;
+            Direction after_next_direction;
+
+            bool               detection_front[smodel::SENSOR_COUNT];
+            bool               detection_rear[smodel::SENSOR_COUNT];
+            std::vector<float> line_positions_front;
+            std::vector<float> line_positions_rear;
+
+            unsigned long selected_edge = 0u;
+
+            float distance_travelled = 0.0f;
+            int   section_percentage = 0;
 
             PirateController()
             {
-                current_node = 'P';
+                previous_node      = 'P';
+                previous_direction = Direction::STRAIGHT;
 
                 srand(time(NULL));
                 if (rand() % 2 == 0)
                 {
-                    next_node = 'Q';
-                    direction = Direction::STRAIGHT;
+                    next_node            = 'Q';
+                    next_direction       = Direction::STRAIGHT;
+                    after_next_node      = 'R';
+                    after_next_direction = Direction::STRAIGHT;
                 }
                 else
                 {
-                    next_node = 'M';
-                    direction = Direction::LEFT;
+                    next_node      = 'M';
+                    next_direction = Direction::LEFT;
+                    if (rand() % 2 == 0)
+                    {
+                        after_next_node      = 'H';
+                        after_next_direction = Direction::STRAIGHT;
+                    }
+                    else
+                    {
+                        after_next_node      = 'K';
+                        after_next_direction = Direction::RIGHT;
+                    }
                 }
 
-                switch (direction)
-                {
-                    case Direction::LEFT:
-                        std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: left" << std::endl;
-                        break;
-                    case Direction::RIGHT:
-                        std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: right" << std::endl;
-                        break;
-                    case Direction::STRAIGHT:
-                        std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: straight" << std::endl;
-                        break;
-                    default:
-                        break;
-                }
+                std::cout << previous_node << "->" << next_node << "->" << after_next_node << "[" << next_direction << ", " << after_next_direction
+                          << "]" << std::endl;
             }
 
             ~PirateController() {}
@@ -234,96 +284,191 @@ namespace rsim
                 return proportional_term + integral + derivative_term;
             }
 
-            template <size_t cols>
-            void lateral_control(bool (&detection_)[cols])
+            void set_detection_front(bool *detection_front_, std::vector<float> line_positions_front_)
             {
-                if (std::all_of(std::begin(detection_), std::end(detection_), [](bool b) { return b; })) { return; }
-
-                auto  control_timestamp_ = std::chrono::steady_clock::now();
-                float dt                 = std::chrono::duration_cast<std::chrono::milliseconds>(control_timestamp_ - prev_control_timestamp_).count() / 1000.0f;
-                prev_control_timestamp_  = control_timestamp_;
-
-                unsigned long sensor_center = cols / 2;
-
-                unsigned long rightmost = 0;
-                for (unsigned long i = 0; i < cols; i++)
-                    if (!detection_[i] && i > rightmost) rightmost = i;
-
-                unsigned long leftmost = cols;
-                for (unsigned long i = 0; i < cols; i++)
-                    if (!detection_[i] && i < leftmost) leftmost = i;
-
-                unsigned long center = leftmost;
-                for (unsigned long i = leftmost; i <= rightmost; i++)
-                    if (!detection_[i] && std::abs(static_cast<int>(i - (rightmost + leftmost) / 2)) < std::abs(static_cast<int>(center - (rightmost + leftmost) / 2))) center = i;
-
-                // instead find the closest to the sensor center
-                // unsigned long center = leftmost;
-                // for (unsigned long i = leftmost; i <= rightmost; i++)
-                //     if (!detection_[i] && std::abs(static_cast<int>(i - sensor_center)) < std::abs(static_cast<int>(center - sensor_center)))
-                //         center = i;
-
-                if (direction == Direction::LEFT) selected = leftmost;
-                if (direction == Direction::RIGHT) selected = rightmost;
-                if (direction == Direction::STRAIGHT) selected = center;
-
-                float error  = (static_cast<int>(selected - sensor_center)) / static_cast<float>(sensor_center);
-                target_angle = PID(error, dt);
-
-                prev_error = error;
+                for (unsigned long i = 0; i < smodel::SENSOR_COUNT; i++) detection_front[i] = detection_front_[i];
+                line_positions_front = line_positions_front_;
             }
 
-            void longitudinal_control() { target_speed = SPEED; }
-
-            template <size_t cols>
-            void update(bool (&detection_)[cols], [[maybe_unused]] bool under_gate_, [[maybe_unused]] bool at_cross_section_, [[maybe_unused]] vmodel::State state_)
+            void set_detection_rear(bool *detection_rear_, std::vector<float> line_positions_rear_)
             {
+                for (unsigned long i = 0; i < smodel::SENSOR_COUNT; i++) detection_rear[i] = detection_rear_[i];
+                line_positions_rear = line_positions_rear_;
+            }
+
+            float select_control_point(std::vector<float> line_positions, float prev_line_position)
+            {
+                std::sort(line_positions.begin(), line_positions.end());
+
+                if (line_positions.size() == 1) { return line_positions[0]; }
+                else if (line_positions.size() == 2)
+                {
+                    switch (next_direction)
+                    {
+                        case Direction::LEFT:
+                        {
+                            return line_positions[0];
+                        }
+                        case Direction::STRAIGHT:
+                        {
+                            if (next_direction == previous_direction)
+                            {
+                                return std::fabs(line_positions[0] - prev_line_position) > std::fabs(line_positions[1] - prev_line_position)
+                                           ? line_positions[0]
+                                           : line_positions[1];
+                            }
+                            else
+                            {
+                                return std::fabs(line_positions[0] - prev_line_position) < std::fabs(line_positions[1] - prev_line_position)
+                                           ? line_positions[0]
+                                           : line_positions[1];
+                            }
+                        }
+                        case Direction::RIGHT:
+                        {
+                            return line_positions[1];
+                        }
+                        default:
+                            return 0.0f;
+                    }
+                }
+                else if (line_positions.size() == 3)
+                {
+                    switch (next_direction)
+                    {
+                        case Direction::LEFT:
+                        {
+                            return line_positions[0];
+                        }
+                        case Direction::STRAIGHT:
+                        {
+                            return line_positions[1];
+                        }
+                        case Direction::RIGHT:
+                        {
+                            return line_positions[2];
+                        }
+                        default:
+                            return 0.0f;
+                    }
+                }
+                else if (line_positions.size() == 4)
+                {
+                    switch (next_direction)
+                    {
+                        case Direction::LEFT:
+                        {
+                            return line_positions[0];
+                        }
+                        case Direction::STRAIGHT:
+                        {
+                            return line_positions[1] + line_positions[2] / 2.0f;
+                        }
+                        case Direction::RIGHT:
+                        {
+                            return line_positions[3];
+                        }
+                        default:
+                            return 0.0f;
+                    }
+                }
+                else
+                {
+                    // this should never happen
+
+                    return 0.0f;
+                }
+            }
+
+            void lateral_control([[maybe_unused]] const float dt)
+            {
+                if (std::all_of(std::begin(detection_front), std::end(detection_front), [](bool b) { return b; }) || line_positions_front.size() == 0)
+                {
+                    return;
+                }
+
+                if (line_positions_front.size() > 4 || line_positions_rear.size() > 4) { return; }
+
+                line_position_front      = select_control_point(line_positions_front, prev_line_position_front);
+                line_position_rear       = select_control_point(line_positions_rear, prev_line_position_rear);
+                prev_line_position_front = line_position_front;
+                prev_line_position_rear  = line_position_rear;
+
+                float sensor_rate   = 1.0;
+                float sensor_center = smodel::SENSOR_COUNT / 2.0f;
+                selected_front      = static_cast<unsigned long>(line_position_front / sensor_rate + sensor_center);
+                selected_rear       = static_cast<unsigned long>(line_position_rear / sensor_rate + sensor_center);
+
+                target_angle = PID(line_position_front, dt);
+
+                prev_error = line_position_front;
+            }
+
+            void longitudinal_control([[maybe_unused]] const float dt) { target_speed = SPEED; }
+
+            PirateInterface update([[maybe_unused]] bool under_gate_, [[maybe_unused]] bool at_cross_section_, [[maybe_unused]] vmodel::State state_)
+            {
+                auto                   control_timestamp_ = std::chrono::steady_clock::now();
+                [[maybe_unused]] float dt =
+                    std::chrono::duration_cast<std::chrono::milliseconds>(control_timestamp_ - prev_control_timestamp_).count() / 1000.0f;
+                prev_control_timestamp_ = control_timestamp_;
+
                 bool at_decision_point = under_gate_ || at_cross_section_;
+
+                for (unsigned long i = 0; i < graph[previous_node].edges.size(); i++)
+                {
+                    if (graph[previous_node].edges[i].node == next_node)
+                    {
+                        selected_edge = i;
+                        break;
+                    }
+                }
+
+                distance_travelled += SPEED * dt;
+                auto distance      = graph[previous_node].edges[selected_edge].distance;
+                section_percentage = static_cast<int>(distance_travelled / distance * 100.0f);
 
                 if (!prev_at_decision_point && at_decision_point)
                 {
                     if (std::sqrt(std::pow(graph[next_node].x - state_.x, 2) + std::pow(graph[next_node].y - state_.y, 2)) < 8.0f)
                     {
-                        auto at_node = next_node;
+                        previous_node      = next_node;
+                        next_node          = after_next_node;
+                        previous_direction = next_direction;
+                        next_direction     = after_next_direction;
+                        distance_travelled = 0.0f;
 
                         while (true)
                         {
-                            unsigned long num_neighbors = graph[at_node].edges.size();
+                            unsigned long num_neighbors = graph[next_node].edges.size();
                             auto          selected_edge = rand() % num_neighbors;
 
-                            if (graph[at_node].edges[selected_edge].node == 'P' || graph[at_node].edges[selected_edge].node == 'U' || graph[at_node].edges[selected_edge].node == 'X') { continue; }
-
-                            auto prev_nodes = graph[at_node].edges[selected_edge].prev_nodes;
-                            if (std::find(prev_nodes.begin(), prev_nodes.end(), current_node) != prev_nodes.end())
+                            if (graph[next_node].edges[selected_edge].node == 'P' || graph[next_node].edges[selected_edge].node == 'U' ||
+                                graph[next_node].edges[selected_edge].node == 'X')
                             {
-                                next_node    = graph[at_node].edges[selected_edge].node;
-                                current_node = at_node;
-                                direction    = graph[at_node].edges[selected_edge].direction;
+                                continue;
+                            }
+
+                            auto prev_nodes = graph[next_node].edges[selected_edge].prev_nodes;
+                            if (std::find(prev_nodes.begin(), prev_nodes.end(), previous_node) != prev_nodes.end())
+                            {
+                                after_next_node      = graph[next_node].edges[selected_edge].node;
+                                after_next_direction = graph[next_node].edges[selected_edge].direction;
                                 break;
                             }
                         }
 
-                        switch (direction)
-                        {
-                            case Direction::LEFT:
-                                std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: left" << std::endl;
-                                break;
-                            case Direction::RIGHT:
-                                std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: right" << std::endl;
-                                break;
-                            case Direction::STRAIGHT:
-                                std::cout << "[P] at: " << current_node << " to: " << next_node << " dir: straight" << std::endl;
-                                break;
-                            default:
-                                break;
-                        }
+                        std::cout << previous_node << "->" << next_node << "->" << after_next_node << "[" << next_direction << ", "
+                                  << after_next_direction << "]" << std::endl;
                     }
                 }
 
-                lateral_control(detection_);
-                longitudinal_control();
+                lateral_control(dt);
+                longitudinal_control(dt);
 
                 prev_at_decision_point = at_decision_point;
+
+                return PirateInterface{previous_node, next_node, after_next_node, section_percentage};
             }
 
         private:
@@ -334,9 +479,9 @@ namespace rsim
             std::chrono::time_point<std::chrono::steady_clock> prev_control_timestamp_ = std::chrono::steady_clock::now();
 
             Graph graph;
-            // char prev_node;
-            char current_node;
-            char next_node;
+            char  previous_node;
+            char  next_node;
+            char  after_next_node;
         };
     }  // namespace pmodel
 
