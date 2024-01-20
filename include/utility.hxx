@@ -135,8 +135,8 @@ namespace rsim
         PARAM float Ki          = 0.05f;   // -
         PARAM float Kd          = 0.025f;  // -
         PARAM float SPEED       = 50.0f;   // px/s
-        PARAM bool  USE_SEED    = true;    // -
-        PARAM int   RANDOM_SEED = 12;      // -
+        PARAM bool  USE_SEED    = false;   // -
+        PARAM int   RANDOM_SEED = 25;      // -
 
     }  // namespace pmodel
 
