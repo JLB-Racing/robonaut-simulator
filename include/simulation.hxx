@@ -132,8 +132,6 @@ namespace rsim
             safety_car.detect_front(map.data);
             safety_car_controller.update(safety_car.line_sensor_front.get_detection());
             safety_car.update(safety_car_controller.target_angle, safety_car_controller.target_speed);
-
-            // std::cout << safety_car_controller.target_speed << "\t" << safety_car.state.velocity << std::endl;
         }
 
     private:

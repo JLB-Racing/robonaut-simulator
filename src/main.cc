@@ -37,6 +37,7 @@ int main(int, char **)
     /*===================================================*/
 
     std::atomic<bool> terminate_threads(false);
+    std::atomic<bool> pause_threads(false);
 
     std::thread thread_control(
         [&]()
@@ -80,6 +81,8 @@ int main(int, char **)
                 simulation.update(wheel_angle, velocity);
 
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));  // 200 Hz
+
+                while (pause_threads) { std::this_thread::sleep_for(std::chrono::milliseconds(100)); }
             }
         });
 
@@ -90,6 +93,8 @@ int main(int, char **)
             {
                 logic.send_telemetry();
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));  // 10 Hz
+
+                while (pause_threads) { std::this_thread::sleep_for(std::chrono::milliseconds(100)); }
             }
         });
 
@@ -165,6 +170,8 @@ int main(int, char **)
             window, sf::Vector2f(120, 10), sf::Vector2f(100, 25), "Safety Car start", font, 12, sf::Color::Black, sf::Color{200, 200, 200});
         rsim::gui::Button safetyCarResetButton(
             window, sf::Vector2f(120, 45), sf::Vector2f(100, 25), "Safety Car reset", font, 12, sf::Color::Black, sf::Color{200, 200, 200});
+        rsim::gui::Button pauseButton(
+            window, sf::Vector2f(230, 10), sf::Vector2f(100, 25), "Pause", font, 12, sf::Color::Black, sf::Color{200, 200, 200});
 
         sf::Vector2f mousePos;
 
@@ -197,6 +204,19 @@ int main(int, char **)
                             {
                                 simulation.flood = true;
                                 std::cout << "███████████████████ Flood ███████████████████" << std::endl;
+                            }
+                        }
+                        if (pauseButton.isMouseOver())
+                        {
+                            if (!pause_threads)
+                            {
+                                pause_threads = true;
+                                std::cout << "███████████████████ Pause ███████████████████" << std::endl;
+                            }
+                            else
+                            {
+                                pause_threads = false;
+                                std::cout << "███████████████████ Resume ███████████████████" << std::endl;
                             }
                         }
                     }
@@ -319,6 +339,7 @@ int main(int, char **)
             floodButton.draw();
             safetyCarStartButton.draw();
             safetyCarResetButton.draw();
+            pauseButton.draw();
 
             // bottom right corner display mouse position
             sf::Text mousePosText;

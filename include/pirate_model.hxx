@@ -159,7 +159,7 @@ namespace rsim
                 this->operator[]('M').add_edge('H', Direction::STRAIGHT, {'P', 'Q', 'R'}, 2.0f * UNIT);
                 this->operator[]('M').add_edge('K', Direction::RIGHT, {'P', 'Q', 'R'}, QUARTER_CIRCLE);
                 this->operator[]('M').add_edge('R', Direction::LEFT, {'H', 'K'}, QUARTER_CIRCLE);
-                this->operator[]('M').add_edge('Q', Direction::STRAIGHT, {'H', 'K'}, UNIT);
+                // this->operator[]('M').add_edge('Q', Direction::STRAIGHT, {'H', 'K'}, UNIT);
                 this->operator[]('M').add_edge('P', Direction::RIGHT, {'H', 'K'}, QUARTER_CIRCLE);
                 this->operator[]('N').add_edge('K', Direction::LEFT, {'R', 'S', 'T'}, QUARTER_CIRCLE);
                 this->operator[]('N').add_edge('I', Direction::STRAIGHT, {'R', 'S', 'T'}, 2.0f * UNIT);
@@ -168,17 +168,17 @@ namespace rsim
                 this->operator[]('N').add_edge('S', Direction::STRAIGHT, {'K', 'I', 'L'}, UNIT);
                 this->operator[]('N').add_edge('R', Direction::RIGHT, {'K', 'I', 'L'}, QUARTER_CIRCLE);
                 this->operator[]('O').add_edge('L', Direction::LEFT, {'T', 'U', 'W'}, QUARTER_CIRCLE);
-                this->operator[]('O').add_edge('U', Direction::LEFT, {'L'}, QUARTER_CIRCLE);
+                // this->operator[]('O').add_edge('U', Direction::LEFT, {'L'}, QUARTER_CIRCLE);
                 this->operator[]('O').add_edge('W', Direction::STRAIGHT, {'L'}, UNIT + QUARTER_CIRCLE);
                 this->operator[]('O').add_edge('T', Direction::RIGHT, {'L'}, QUARTER_CIRCLE);
                 this->operator[]('P').add_edge('M', Direction::LEFT, {'P'}, QUARTER_CIRCLE);
                 this->operator[]('P').add_edge('Q', Direction::STRAIGHT, {'P'}, UNIT);
-                this->operator[]('Q').add_edge('P', Direction::STRAIGHT, {'R'}, UNIT);
+                // this->operator[]('Q').add_edge('P', Direction::STRAIGHT, {'R'}, UNIT);
                 this->operator[]('Q').add_edge('M', Direction::STRAIGHT, {'V', 'X'}, UNIT);
                 this->operator[]('Q').add_edge('R', Direction::STRAIGHT, {'P'}, UNIT);
                 this->operator[]('Q').add_edge('V', Direction::LEFT, {'M'}, QUARTER_CIRCLE);
-                this->operator[]('Q').add_edge('X', Direction::STRAIGHT, {'M'}, 2.5f * UNIT + QUARTER_CIRCLE);
-                this->operator[]('R').add_edge('Q', Direction::STRAIGHT, {'N', 'S'}, UNIT);
+                // this->operator[]('Q').add_edge('X', Direction::STRAIGHT, {'M'}, 2.5f * UNIT + QUARTER_CIRCLE);
+                // this->operator[]('R').add_edge('Q', Direction::STRAIGHT, {'N', 'S'}, UNIT);
                 this->operator[]('R').add_edge('M', Direction::RIGHT, {'N', 'S'}, QUARTER_CIRCLE);
                 this->operator[]('R').add_edge('N', Direction::LEFT, {'M', 'Q'}, QUARTER_CIRCLE);
                 this->operator[]('R').add_edge('S', Direction::STRAIGHT, {'M', 'Q'}, UNIT);
@@ -190,16 +190,16 @@ namespace rsim
                 this->operator[]('T').add_edge('S', Direction::STRAIGHT, {'O', 'U'}, UNIT);
                 this->operator[]('T').add_edge('N', Direction::RIGHT, {'O', 'U'}, QUARTER_CIRCLE);
                 this->operator[]('T').add_edge('O', Direction::LEFT, {'N', 'S'}, QUARTER_CIRCLE);
-                this->operator[]('T').add_edge('U', Direction::STRAIGHT, {'N', 'S'}, 2.0f * UNIT);
-                this->operator[]('U').add_edge('T', Direction::STRAIGHT, {'U'}, 2.0f * UNIT);
-                this->operator[]('U').add_edge('O', Direction::RIGHT, {'U'}, QUARTER_CIRCLE);
+                // this->operator[]('T').add_edge('U', Direction::STRAIGHT, {'N', 'S'}, 2.0f * UNIT);
+                // this->operator[]('U').add_edge('T', Direction::STRAIGHT, {'U'}, 2.0f * UNIT);
+                // this->operator[]('U').add_edge('O', Direction::RIGHT, {'U'}, QUARTER_CIRCLE);
                 this->operator[]('V').add_edge('Q', Direction::RIGHT, {'S', 'W'}, QUARTER_CIRCLE);
                 this->operator[]('V').add_edge('S', Direction::LEFT, {'Q'}, QUARTER_CIRCLE);
                 this->operator[]('V').add_edge('W', Direction::STRAIGHT, {'Q'}, 2.0f * UNIT);
                 this->operator[]('W').add_edge('V', Direction::STRAIGHT, {'O'}, 2.0f * UNIT);
                 this->operator[]('W').add_edge('S', Direction::RIGHT, {'O'}, QUARTER_CIRCLE);
                 this->operator[]('W').add_edge('O', Direction::STRAIGHT, {'S', 'V'}, UNIT + QUARTER_CIRCLE);
-                this->operator[]('X').add_edge('Q', Direction::STRAIGHT, {}, 2.5f * UNIT + QUARTER_CIRCLE);
+                // this->operator[]('X').add_edge('Q', Direction::STRAIGHT, {}, 2.5f * UNIT + QUARTER_CIRCLE);
             }
 
             ~Graph() {}
@@ -246,7 +246,8 @@ namespace rsim
                 previous_node      = 'P';
                 previous_direction = Direction::STRAIGHT;
 
-                srand(time(NULL));
+                if (USE_SEED) { srand(RANDOM_SEED); }
+                else { srand(time(NULL)); }
                 if (rand() % 2 == 0)
                 {
                     next_node            = 'Q';
@@ -425,8 +426,6 @@ namespace rsim
                 }
 
                 distance_travelled += SPEED * dt;
-                auto distance      = graph[previous_node].edges[selected_edge].distance;
-                section_percentage = static_cast<int>(distance_travelled / distance * 100.0f);
 
                 if (!prev_at_decision_point && at_decision_point)
                 {
@@ -462,6 +461,9 @@ namespace rsim
                                   << after_next_direction << "]" << std::endl;
                     }
                 }
+
+                auto distance      = graph[previous_node].edges[selected_edge].distance;
+                section_percentage = static_cast<int>(distance_travelled / distance * 100.0f);
 
                 lateral_control(dt);
                 longitudinal_control(dt);

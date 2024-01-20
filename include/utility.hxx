@@ -131,10 +131,12 @@ namespace rsim
     namespace pmodel
     {
 
-        PARAM float Kp    = 10.0f;   // -
-        PARAM float Ki    = 0.05f;   // -
-        PARAM float Kd    = 0.025f;  // -
-        PARAM float SPEED = 20.0f;   // px/s
+        PARAM float Kp          = 10.0f;   // -
+        PARAM float Ki          = 0.05f;   // -
+        PARAM float Kd          = 0.025f;  // -
+        PARAM float SPEED       = 50.0f;   // px/s
+        PARAM bool  USE_SEED    = true;    // -
+        PARAM int   RANDOM_SEED = 12;      // -
 
     }  // namespace pmodel
 
@@ -154,7 +156,7 @@ namespace rsim
         PARAM float Kp    = 10.0f;   // -
         PARAM float Ki    = 0.05f;   // -
         PARAM float Kd    = 0.025f;  // -
-        PARAM float SPEED = 40.0f;   // px/s
+        PARAM float SPEED = 50.0f;   // px/s
 
     }  // namespace scmodel
 
