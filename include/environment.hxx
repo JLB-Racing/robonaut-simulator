@@ -196,7 +196,8 @@ namespace rsim
                 for (unsigned gcol = 0; gcol < GRID_WIDTH; gcol++)
                     for (unsigned grow = 0; grow < GRID_HEIGHT; grow++)
                         for (unsigned bcol = 0; bcol < BITMAP_SIZE; bcol++)
-                            for (unsigned brow = 0; brow < BITMAP_SIZE; brow++) data[gcol * BITMAP_SIZE + bcol][grow * BITMAP_SIZE + brow] = grid[gcol][grow].bitmap[bcol][brow];
+                            for (unsigned brow = 0; brow < BITMAP_SIZE; brow++)
+                                data[gcol * BITMAP_SIZE + bcol][grow * BITMAP_SIZE + brow] = grid[gcol][grow].bitmap[bcol][brow];
 
                 serialize_map("competition.map");
             }
@@ -400,7 +401,8 @@ namespace rsim
                 copy        = line;
                 grid[15][6] = std::move(copy);
 
-                copy       = balancer;
+                copy = balancer;
+                copy.flip_vertical();
                 grid[1][7] = std::move(copy);
 
                 copy = line_dotted;
@@ -653,13 +655,16 @@ namespace rsim
             smodel::LineSensor   line_sensor_rear;
             smodel::ObjectSensor object_sensor;
 
-            Car(float x_, float y_, float orientation_) : state{x_, y_, orientation_}, line_sensor_front{state}, line_sensor_rear{state}, object_sensor{state} {}
+            Car(float x_, float y_, float orientation_)
+                : state{x_, y_, orientation_}, line_sensor_front{state}, line_sensor_rear{state}, object_sensor{state}
+            {
+            }
 
             void update(float wheel_angle, float velocity)
             {
                 auto  update_timestamp_ = std::chrono::steady_clock::now();
-                float dt                = std::chrono::duration_cast<std::chrono::milliseconds>(update_timestamp_ - prev_update_timestamp_).count() / 1000.0f;
-                prev_update_timestamp_  = update_timestamp_;
+                float dt = std::chrono::duration_cast<std::chrono::milliseconds>(update_timestamp_ - prev_update_timestamp_).count() / 1000.0f;
+                prev_update_timestamp_ = update_timestamp_;
 
                 state.update(wheel_angle, velocity, dt);
                 line_sensor_front.update(state);

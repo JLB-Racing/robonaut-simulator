@@ -282,6 +282,29 @@ int main(int, char **)
             /*      MAP                                         */
             /*===================================================*/
 
+            // balancer end point
+            sf::CircleShape circle(rsim::BALANCER_END_RADIUS);
+            circle.setFillColor(sf::Color{200, 200, 200});
+            circle.setPosition(rsim::BALANCER_END_CENTER_X - rsim::BALANCER_END_RADIUS, rsim::BALANCER_END_CENTER_Y - rsim::BALANCER_END_RADIUS);
+            window.draw(circle);
+
+            sf::Text text;
+            text.setFont(font);
+            text.setStyle(sf::Text::Bold);
+            text.setString('X');
+            text.setCharacterSize(14);
+            text.setFillColor(sf::Color::Black);
+            text.setPosition(96 + 8, 448 + 4);
+            window.draw(text);
+
+            text.setFont(font);
+            text.setStyle(sf::Text::Bold);
+            text.setString('Y');
+            text.setCharacterSize(14);
+            text.setFillColor(sf::Color::Black);
+            text.setPosition(96 + 8, 576 + 4);
+            window.draw(text);
+
             for (unsigned long col = 0; col < rsim::env::MAP_WIDTH; col++)
             {
                 for (unsigned long row = 0; row < rsim::env::MAP_HEIGHT; row++)
@@ -295,12 +318,6 @@ int main(int, char **)
                     }
                 }
             }
-
-            // balancer end point
-            sf::CircleShape circle(rsim::BALANCER_END_RADIUS);
-            circle.setFillColor(sf::Color{200, 200, 200});
-            circle.setPosition(rsim::BALANCER_END_CENTER_X - rsim::BALANCER_END_RADIUS, rsim::BALANCER_END_CENTER_Y - rsim::BALANCER_END_RADIUS);
-            window.draw(circle);
 
             /*===================================================*/
             /*      CARS                                        */
