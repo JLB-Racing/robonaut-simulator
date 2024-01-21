@@ -63,7 +63,7 @@ int main(int, char **)
                 logic.set_under_gate(under_gate);
                 logic.set_at_cross_section(at_cross_section);
                 logic.set_flood(flood);
-                logic.imu_callback(yaw_rate);
+                logic.imu_callback(0.0f, 0.0f, yaw_rate, 0.0f, 0.0f, 0.0f);
                 logic.rpm_callback(motor_rpm);
                 logic.pirate_callback(prev_node, next_node, after_next_node, section_percentage);
                 /*                                                   */
