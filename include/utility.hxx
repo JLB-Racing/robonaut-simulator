@@ -9,8 +9,8 @@
 //
 
 #define PARAM       static constexpr
-#define px_to_m(px) (px * rsim::SQUARE_LENGTH / rsim::env::BITMAP_SIZE)
-#define m_to_px(m)  (m * rsim::env::BITMAP_SIZE / rsim::SQUARE_LENGTH)
+#define px_to_m(px) (px * (rsim::SQUARE_LENGTH * 2.0f) / rsim::env::BITMAP_SIZE)
+#define m_to_px(m)  (m * rsim::env::BITMAP_SIZE / (rsim::SQUARE_LENGTH * 2.0f))
 
 //
 //      END DEFINES
@@ -41,7 +41,7 @@ namespace rsim
     PARAM float BALANCER_END_CENTER_Y        = 568.0f;        // px
     PARAM float BALANCER_END_RADIUS          = 8.0f;          // px
 
-    PARAM float SQUARE_LENGTH = 0.6f * 2.0f;  // m
+    PARAM float SQUARE_LENGTH = 0.6f;  // m
 
     //
     //      END SIMULATION
@@ -136,8 +136,8 @@ namespace rsim
         PARAM float Ki          = 0.05f;          // -
         PARAM float Kd          = 0.025f;         // -
         PARAM float SPEED       = m_to_px(1.0f);  // px/s
-        PARAM bool  USE_SEED    = true;           // -
-        PARAM int   RANDOM_SEED = 1706189612;     // -
+        PARAM bool  USE_SEED    = false;          // -
+        PARAM int   RANDOM_SEED = 1706215468;     // -
 
     }  // namespace pmodel
 
