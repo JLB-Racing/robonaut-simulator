@@ -37,10 +37,11 @@ namespace rsim
     PARAM float SAFETY_CAR_START_X           = 224.0f;        // px
     PARAM float SAFETY_CAR_START_Y           = 448.0f;        // px
     PARAM float SAFETY_CAR_START_ORIENTATION = M_PI / 2.0f;   // rad
-    PARAM float SQUARE_LENGTH                = 0.6;           // m
     PARAM float BALANCER_END_CENTER_X        = 96.0f;         // px
     PARAM float BALANCER_END_CENTER_Y        = 568.0f;        // px
     PARAM float BALANCER_END_RADIUS          = 8.0f;          // px
+
+    PARAM float SQUARE_LENGTH = 0.6f * 2.0f;  // m
 
     //
     //      END SIMULATION
@@ -131,12 +132,12 @@ namespace rsim
     namespace pmodel
     {
 
-        PARAM float Kp          = 10.0f;   // -
-        PARAM float Ki          = 0.05f;   // -
-        PARAM float Kd          = 0.025f;  // -
-        PARAM float SPEED       = 50.0f;   // px/s
-        PARAM bool  USE_SEED    = true;    // -
-        PARAM int   RANDOM_SEED = 26;      // -
+        PARAM float Kp          = 10.0f;          // -
+        PARAM float Ki          = 0.05f;          // -
+        PARAM float Kd          = 0.025f;         // -
+        PARAM float SPEED       = m_to_px(1.0f);  // px/s
+        PARAM bool  USE_SEED    = true;           // -
+        PARAM int   RANDOM_SEED = 1706189612;     // -
 
     }  // namespace pmodel
 

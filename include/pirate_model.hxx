@@ -247,7 +247,12 @@ namespace rsim
                 previous_direction = Direction::STRAIGHT;
 
                 if (USE_SEED) { srand(RANDOM_SEED); }
-                else { srand(time(NULL)); }
+                else
+                {
+                    auto seed = time(NULL);
+                    std::cout << "SEED: " << seed << std::endl;
+                    srand(seed);
+                }
                 if (rand() % 2 == 0)
                 {
                     next_node            = 'Q';
@@ -314,13 +319,13 @@ namespace rsim
                         {
                             if (next_direction == previous_direction)
                             {
-                                return std::fabs(line_positions[0] - prev_line_position) > std::fabs(line_positions[1] - prev_line_position)
+                                return std::fabs(line_positions[0] - prev_line_position) < std::fabs(line_positions[1] - prev_line_position)
                                            ? line_positions[0]
                                            : line_positions[1];
                             }
                             else
                             {
-                                return std::fabs(line_positions[0] - prev_line_position) < std::fabs(line_positions[1] - prev_line_position)
+                                return std::fabs(line_positions[0] - prev_line_position) > std::fabs(line_positions[1] - prev_line_position)
                                            ? line_positions[0]
                                            : line_positions[1];
                             }
