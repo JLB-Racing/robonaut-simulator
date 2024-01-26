@@ -77,9 +77,128 @@ namespace rsim
         {
         public:
             std::vector<Node> nodes;
+            Node              invalid_node = Node{'@', 0.0f, 0.0f};
 
             Graph()
             {
+#ifdef Q2
+                nodes.push_back(Node{static_cast<char>('A'), 128.0f, 256.0f});
+                nodes.push_back(Node{static_cast<char>('B'), 192.0f, 192.0f});
+                nodes.push_back(Node{static_cast<char>('C'), 256.0f, 256.0f});
+                nodes.push_back(Node{static_cast<char>('D'), 320.0f, 128.0f});
+                nodes.push_back(Node{static_cast<char>('E'), 320.0f, 256.0f});
+                nodes.push_back(Node{static_cast<char>('F'), 448.0f, 128.0f});
+                nodes.push_back(Node{static_cast<char>('G'), 448.0f, 256.0f});
+                nodes.push_back(Node{static_cast<char>('H'), 576.0f, 128.0f});
+                nodes.push_back(Node{static_cast<char>('I'), 576.0f, 256.0f});
+                nodes.push_back(Node{static_cast<char>('J'), 704.0f, 192.0f});
+                nodes.push_back(Node{static_cast<char>('K'), 832.0f, 128.0f});
+                nodes.push_back(Node{static_cast<char>('L'), 832.0f, 256.0f});
+                nodes.push_back(Node{static_cast<char>('M'), 960.0f, 128.0f});
+                nodes.push_back(Node{static_cast<char>('N'), 960.0f, 256.0f});
+                nodes.push_back(Node{static_cast<char>('O'), 1088.0f, 192.0f});
+                nodes.push_back(Node{static_cast<char>('P'), 1216.0f, 128.0f});
+                nodes.push_back(Node{static_cast<char>('Q'), 1216.0f, 256.0f});
+                nodes.push_back(Node{static_cast<char>('R'), 1344.0f, 128.0f});
+                nodes.push_back(Node{static_cast<char>('S'), 1344.0f, 256.0f});
+                nodes.push_back(Node{static_cast<char>('T'), 1472.0f, 192.0f});
+                nodes.push_back(Node{static_cast<char>('U'), 1600.0f, 128.0f});
+                nodes.push_back(Node{static_cast<char>('V'), 1600.0f, 256.0f});
+                nodes.push_back(Node{static_cast<char>('W'), 1664.0f, 128.0f});
+                nodes.push_back(Node{static_cast<char>('X'), 1664.0f, 256.0f});
+                nodes.push_back(Node{static_cast<char>('Y'), 1792.0f, 128.0f});
+                nodes.push_back(Node{static_cast<char>('Z'), 1792.0f, 224.0f});
+                nodes.push_back(Node{static_cast<char>('['), 1920.0f, 224.0f});
+
+                const auto UNIT            = m_to_px(SQUARE_LENGTH * 2.0f);
+                const auto QUARTER_CIRCLE  = m_to_px(2 * UNIT * M_PI / 4.0f);
+                const auto CROSS_UNIT      = m_to_px(3.65f);
+                const auto HALF_CROSS_UNIT = m_to_px(2.7f);
+
+                // this->operator[]('A').add_edge('C', Direction::RIGHT, {'A'}, 2.0f * UNIT);
+                this->operator[]('B').add_edge('C', Direction::LEFT, {'D'}, QUARTER_CIRCLE);
+                this->operator[]('B').add_edge('D', Direction::STRAIGHT, {'C'}, QUARTER_CIRCLE + UNIT);
+                // this->operator[]('C').add_edge('A', Direction::LEFT, {'E'}, 2.0f * UNIT);
+                this->operator[]('C').add_edge('E', Direction::STRAIGHT, {'A', 'B'}, UNIT);
+                this->operator[]('C').add_edge('B', Direction::RIGHT, {'E'}, QUARTER_CIRCLE);
+                this->operator[]('D').add_edge('B', Direction::STRAIGHT, {'F'}, QUARTER_CIRCLE + UNIT);
+                this->operator[]('D').add_edge('F', Direction::LEFT, {'B'}, 2.0f * UNIT);
+                this->operator[]('E').add_edge('C', Direction::STRAIGHT, {'F', 'G'}, UNIT);
+                this->operator[]('E').add_edge('F', Direction::LEFT, {'C'}, CROSS_UNIT);
+                this->operator[]('E').add_edge('G', Direction::RIGHT, {'C'}, 2.0f * UNIT);
+                this->operator[]('F').add_edge('D', Direction::RIGHT, {'H', 'I'}, 2.0f * UNIT);
+                this->operator[]('F').add_edge('E', Direction::LEFT, {'H', 'I'}, CROSS_UNIT);
+                this->operator[]('F').add_edge('H', Direction::LEFT, {'D', 'E'}, 2.0f * UNIT);
+                this->operator[]('F').add_edge('I', Direction::RIGHT, {'D', 'E'}, CROSS_UNIT);
+                this->operator[]('G').add_edge('E', Direction::LEFT, {'H', 'I'}, 2.0f * UNIT);
+                this->operator[]('G').add_edge('H', Direction::LEFT, {'E'}, CROSS_UNIT);
+                this->operator[]('G').add_edge('I', Direction::RIGHT, {'E'}, 2.0f * UNIT);
+                this->operator[]('H').add_edge('F', Direction::RIGHT, {'J', 'K'}, 2.0f * UNIT);
+                this->operator[]('H').add_edge('G', Direction::LEFT, {'J', 'K'}, CROSS_UNIT);
+                this->operator[]('H').add_edge('J', Direction::RIGHT, {'F', 'G'}, HALF_CROSS_UNIT);
+                this->operator[]('H').add_edge('K', Direction::LEFT, {'F', 'G'}, 4.0f * UNIT);
+                this->operator[]('I').add_edge('F', Direction::RIGHT, {'L'}, CROSS_UNIT);
+                this->operator[]('I').add_edge('G', Direction::LEFT, {'L'}, 2.0f * UNIT);
+                this->operator[]('I').add_edge('L', Direction::RIGHT, {'F', 'G'}, 4.0f * UNIT);
+                this->operator[]('J').add_edge('H', Direction::LEFT, {'K', 'L'}, HALF_CROSS_UNIT);
+                this->operator[]('J').add_edge('K', Direction::LEFT, {'H'}, HALF_CROSS_UNIT);
+                this->operator[]('J').add_edge('L', Direction::RIGHT, {'H'}, HALF_CROSS_UNIT);
+                this->operator[]('K').add_edge('H', Direction::RIGHT, {'M', 'N'}, 4.0f * UNIT);
+                this->operator[]('K').add_edge('J', Direction::LEFT, {'M', 'N'}, HALF_CROSS_UNIT);
+                this->operator[]('K').add_edge('M', Direction::LEFT, {'H', 'J'}, 2.0f * UNIT);
+                this->operator[]('K').add_edge('N', Direction::RIGHT, {'H', 'J'}, CROSS_UNIT);
+                this->operator[]('L').add_edge('I', Direction::LEFT, {'M', 'N'}, 4.0f * UNIT);
+                this->operator[]('L').add_edge('J', Direction::RIGHT, {'M', 'N'}, HALF_CROSS_UNIT);
+                this->operator[]('L').add_edge('M', Direction::LEFT, {'I', 'J'}, CROSS_UNIT);
+                this->operator[]('L').add_edge('N', Direction::RIGHT, {'I', 'J'}, 2.0f * UNIT);
+                this->operator[]('M').add_edge('K', Direction::RIGHT, {'O', 'P'}, 2.0f * UNIT);
+                this->operator[]('M').add_edge('L', Direction::LEFT, {'O', 'P'}, CROSS_UNIT);
+                this->operator[]('M').add_edge('O', Direction::RIGHT, {'K', 'L'}, HALF_CROSS_UNIT);
+                this->operator[]('M').add_edge('P', Direction::LEFT, {'K', 'L'}, 4.0f * UNIT);
+                this->operator[]('N').add_edge('K', Direction::RIGHT, {'O', 'Q'}, CROSS_UNIT);
+                this->operator[]('N').add_edge('L', Direction::LEFT, {'O', 'Q'}, 2.0f * UNIT);
+                this->operator[]('N').add_edge('O', Direction::LEFT, {'K', 'L'}, HALF_CROSS_UNIT);
+                this->operator[]('N').add_edge('Q', Direction::RIGHT, {'K', 'L'}, 4.0f * UNIT);
+                this->operator[]('O').add_edge('M', Direction::RIGHT, {'P'}, HALF_CROSS_UNIT);
+                this->operator[]('O').add_edge('N', Direction::LEFT, {'P'}, HALF_CROSS_UNIT);
+                this->operator[]('O').add_edge('P', Direction::RIGHT, {'M', 'N'}, HALF_CROSS_UNIT);
+                this->operator[]('P').add_edge('M', Direction::RIGHT, {'R', 'S'}, 4.0f * UNIT);
+                this->operator[]('P').add_edge('O', Direction::LEFT, {'R', 'S'}, HALF_CROSS_UNIT);
+                this->operator[]('P').add_edge('R', Direction::LEFT, {'M', 'O'}, 2.0f * UNIT);
+                this->operator[]('P').add_edge('S', Direction::RIGHT, {'M', 'O'}, CROSS_UNIT);
+                this->operator[]('Q').add_edge('N', Direction::LEFT, {'R', 'S'}, 4.0f * UNIT);
+                this->operator[]('Q').add_edge('R', Direction::LEFT, {'N'}, CROSS_UNIT);
+                this->operator[]('Q').add_edge('S', Direction::RIGHT, {'N'}, 2.0f * UNIT);
+                this->operator[]('R').add_edge('P', Direction::RIGHT, {'T', 'U'}, 2.0f * UNIT);
+                this->operator[]('R').add_edge('Q', Direction::LEFT, {'T', 'U'}, CROSS_UNIT);
+                this->operator[]('R').add_edge('T', Direction::RIGHT, {'P', 'Q'}, HALF_CROSS_UNIT);
+                this->operator[]('R').add_edge('U', Direction::LEFT, {'P', 'Q'}, 4.0f * UNIT);
+                this->operator[]('S').add_edge('P', Direction::RIGHT, {'T', 'V'}, CROSS_UNIT);
+                this->operator[]('S').add_edge('Q', Direction::LEFT, {'T', 'V'}, 2.0f * UNIT);
+                this->operator[]('S').add_edge('T', Direction::LEFT, {'P', 'Q'}, HALF_CROSS_UNIT);
+                this->operator[]('S').add_edge('V', Direction::RIGHT, {'P', 'Q'}, 4.0f * UNIT);
+                this->operator[]('T').add_edge('R', Direction::RIGHT, {'U', 'V'}, HALF_CROSS_UNIT);
+                this->operator[]('T').add_edge('S', Direction::LEFT, {'U', 'V'}, HALF_CROSS_UNIT);
+                this->operator[]('T').add_edge('U', Direction::LEFT, {'R', 'S'}, HALF_CROSS_UNIT);
+                this->operator[]('T').add_edge('V', Direction::RIGHT, {'R', 'S'}, HALF_CROSS_UNIT);
+                this->operator[]('U').add_edge('R', Direction::RIGHT, {'W'}, 4.0f * UNIT);
+                this->operator[]('U').add_edge('T', Direction::LEFT, {'W'}, HALF_CROSS_UNIT);
+                this->operator[]('U').add_edge('W', Direction::STRAIGHT, {'R', 'T'}, UNIT);
+                this->operator[]('V').add_edge('S', Direction::LEFT, {'X'}, 4.0f * UNIT);
+                this->operator[]('V').add_edge('T', Direction::RIGHT, {'X'}, HALF_CROSS_UNIT);
+                this->operator[]('V').add_edge('X', Direction::STRAIGHT, {'S', 'T'}, UNIT);
+                this->operator[]('W').add_edge('U', Direction::STRAIGHT, {'X', 'Y'}, UNIT);
+                this->operator[]('W').add_edge('X', Direction::RIGHT, {'U'}, 2.0f * QUARTER_CIRCLE);
+                // this->operator[]('W').add_edge('Y', Direction::LEFT, {'U'}, 2.0f * UNIT);
+                this->operator[]('X').add_edge('V', Direction::STRAIGHT, {'W', 'Z'}, UNIT);
+                this->operator[]('X').add_edge('W', Direction::LEFT, {'V'}, 2.0f * QUARTER_CIRCLE);
+                this->operator[]('X').add_edge('Z', Direction::RIGHT, {'V'}, 2.8f);
+                this->operator[]('Y').add_edge('W', Direction::RIGHT, {'Y'}, 2.0f * UNIT);
+                this->operator[]('Z').add_edge('X', Direction::LEFT, {'['}, 2.8f);
+                this->operator[]('Z').add_edge('[', Direction::STRAIGHT, {'X'}, 2.0f * UNIT);
+                this->operator[]('[').add_edge('Z', Direction::STRAIGHT, {'['}, 2.0f * UNIT);
+
+#else
                 nodes.push_back(Node{static_cast<char>('A'), 704, 448});
                 nodes.push_back(Node{static_cast<char>('B'), 704, 576});
                 nodes.push_back(Node{static_cast<char>('C'), 640, 384});
@@ -202,18 +321,31 @@ namespace rsim
                 // this->operator[]('X').add_edge('Q', Direction::LEFT, {'Y'}, 3.0f * UNIT + 0.85f * QUARTER_CIRCLE);
                 // this->operator[]('X').add_edge('Y', Direction::STRAIGHT, {'Q'}, 2.0f * UNIT);
                 // this->operator[]('Y').add_edge('X', Direction::STRAIGHT, {'Y'}, 2.0f * UNIT);
+#endif
             }
 
             ~Graph() {}
 
-            // Node& get_node(std::string name)
             Node &operator[](char name)
             {
-                if (nodes.empty()) throw std::runtime_error("Graph is empty");
-
-                if (name < 'A' || name > 'X') throw std::runtime_error("Invalid node name");
-
+#ifdef Q2
+                if (nodes.empty() || name < 'A' || name > '[') { return invalid_node; }
                 return nodes[static_cast<int>(name - 'A')];
+#else
+                if (nodes.empty() || name < 'A' || name > 'Y') { return invalid_node; }
+                return nodes[static_cast<int>(name - 'A')];
+#endif
+            }
+
+            const Node &operator[](char name) const
+            {
+#ifdef Q2
+                if (nodes.empty() || name < 'A' || name > '[') { return invalid_node; }
+                return nodes[static_cast<int>(name - 'A')];
+#else
+                if (nodes.empty() || name < 'A' || name > 'Y') { return invalid_node; }
+                return nodes[static_cast<int>(name - 'A')];
+#endif
             }
         };
 
@@ -245,6 +377,22 @@ namespace rsim
 
             PirateController()
             {
+#ifdef Q2
+                previous_node      = 'Y';
+                previous_direction = Direction::STRAIGHT;
+
+                if (USE_SEED) { srand(RANDOM_SEED); }
+                else
+                {
+                    auto seed = time(NULL);
+                    std::cout << "SEED: " << seed << std::endl;
+                    srand(seed);
+                }
+                next_node            = 'W';
+                next_direction       = Direction::RIGHT;
+                after_next_node      = 'U';
+                after_next_direction = Direction::STRAIGHT;
+#else
                 previous_node      = 'P';
                 previous_direction = Direction::STRAIGHT;
 
@@ -277,6 +425,7 @@ namespace rsim
                         after_next_direction = Direction::RIGHT;
                     }
                 }
+#endif
 
                 std::cout << previous_node << "->" << next_node << "->" << after_next_node << "[" << next_direction << ", " << after_next_direction
                           << "]" << std::endl;
@@ -311,34 +460,47 @@ namespace rsim
                 if (line_positions.size() == 1) { return line_positions[0]; }
                 else if (line_positions.size() == 2)
                 {
+                    float tmp;
                     switch (next_direction)
                     {
                         case Direction::LEFT:
                         {
-                            return line_positions[0];
+                            tmp = line_positions[0];
+                            break;
                         }
                         case Direction::STRAIGHT:
                         {
                             if (next_direction == previous_direction)
                             {
-                                return std::fabs(line_positions[0] - prev_line_position) < std::fabs(line_positions[1] - prev_line_position)
-                                           ? line_positions[0]
-                                           : line_positions[1];
+                                tmp = std::fabs(line_positions[0] - prev_line_position) > std::fabs(line_positions[1] - prev_line_position)
+                                          ? line_positions[0]
+                                          : line_positions[1];
                             }
                             else
                             {
-                                return std::fabs(line_positions[0] - prev_line_position) > std::fabs(line_positions[1] - prev_line_position)
-                                           ? line_positions[0]
-                                           : line_positions[1];
+                                tmp = std::fabs(line_positions[0] - prev_line_position) < std::fabs(line_positions[1] - prev_line_position)
+                                          ? line_positions[0]
+                                          : line_positions[1];
                             }
+                            break;
                         }
                         case Direction::RIGHT:
                         {
-                            return line_positions[1];
+                            tmp = line_positions[1];
+                            break;
                         }
                         default:
-                            return 0.0f;
+                        {
+                            tmp = 0.0f;
+                            break;
+                        }
                     }
+
+                    if (section_percentage > 50)
+                    {
+                        tmp = std::fabs(line_positions[0]) < std::fabs(line_positions[1]) ? line_positions[0] : line_positions[1];
+                    }
+                    return tmp;
                 }
                 else if (line_positions.size() == 3)
                 {
@@ -449,11 +611,11 @@ namespace rsim
                             unsigned long num_neighbors = graph[next_node].edges.size();
                             auto          selected_edge = rand() % num_neighbors;
 
-                            if (graph[next_node].edges[selected_edge].node == 'P' || graph[next_node].edges[selected_edge].node == 'U' ||
-                                graph[next_node].edges[selected_edge].node == 'X')
-                            {
-                                continue;
-                            }
+                            // if (graph[next_node].edges[selected_edge].node == 'P' || graph[next_node].edges[selected_edge].node == 'U' ||
+                            //     graph[next_node].edges[selected_edge].node == 'X')
+                            // {
+                            //     continue;
+                            // }
 
                             auto prev_nodes = graph[next_node].edges[selected_edge].prev_nodes;
                             if (std::find(prev_nodes.begin(), prev_nodes.end(), previous_node) != prev_nodes.end())

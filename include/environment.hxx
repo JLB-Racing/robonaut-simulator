@@ -189,9 +189,15 @@ namespace rsim
                 for (unsigned long col = 0; col < MAP_WIDTH; col++)
                     for (unsigned long row = 0; row < MAP_HEIGHT; row++) data[col][row] = true;
 
+#ifndef Q2
                 build_grid_R();
                 build_gates_R();
                 build_cross_sections_R();
+#else
+                build_grid_Q2();
+                build_gates_Q2();
+                build_cross_sections_Q2();
+#endif
 
                 for (unsigned gcol = 0; gcol < GRID_WIDTH; gcol++)
                     for (unsigned grow = 0; grow < GRID_HEIGHT; grow++)
@@ -199,7 +205,11 @@ namespace rsim
                             for (unsigned brow = 0; brow < BITMAP_SIZE; brow++)
                                 data[gcol * BITMAP_SIZE + bcol][grow * BITMAP_SIZE + brow] = grid[gcol][grow].bitmap[bcol][brow];
 
+#ifndef Q2
                 serialize_map("competition.map");
+#else
+                serialize_map("qualification2.map");
+#endif
             }
 
         private:
@@ -212,6 +222,11 @@ namespace rsim
             Bitmap line_triple                   = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/line-triple.bmp");
             Bitmap line_triple_half              = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/line-triple-half.bmp");
             Bitmap line_triple_half_dotted       = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/line-triple-half-dotted.bmp");
+            Bitmap s_turn_soft                   = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/s-turn-soft.bmp");
+            Bitmap s_turn_soft_line_wide         = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/s-turn-soft-line-wide.bmp");
+            Bitmap s_turn_half                   = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/s-turn-half.bmp");
+            Bitmap s_turn_line_wide              = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/s-turn-line-wide.bmp");
+            Bitmap cross_turn_line_wide          = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/cross-turn-line-wide.bmp");
             Bitmap turn                          = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/turn.bmp");
             Bitmap turn2                         = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/turn-2.bmp");
             Bitmap turn3                         = Bitmap("/home/humdalab/RobonAUT/robonaut-simulator/assets/turn-3.bmp");
@@ -255,6 +270,8 @@ namespace rsim
 
                 map_file.close();
             }
+
+#ifndef Q2
 
             void build_grid_R()
             {
@@ -645,6 +662,277 @@ namespace rsim
 
                 cross_sections.push_back(CrossSection(320.0f, 704.0f, 'U'));
             }
+
+#else
+
+            void build_grid_Q2()
+            {
+                auto copy = Bitmap{};
+
+                copy = start;
+                copy.rotate90();
+                grid[1][3] = std::move(copy);
+
+                copy = start;
+                copy.rotate90();
+                copy.flip_vertical();
+                grid[1][4] = std::move(copy);
+
+                copy = line_edge;
+                copy.rotate270();
+                grid[2][3] = std::move(copy);
+
+                copy = turn_line2_wide;
+                copy.flip_horizontal();
+                grid[3][3] = std::move(copy);
+
+                copy = turn;
+                copy.flip_horizontal();
+                copy.flip_vertical();
+                grid[3][2] = std::move(copy);
+
+                copy = line_edge;
+                copy.rotate270();
+                grid[4][3] = std::move(copy);
+
+                copy = line_edge;
+                copy.rotate90();
+                grid[4][2] = std::move(copy);
+
+                copy = line_edge;
+                copy.rotate90();
+                grid[5][2] = std::move(copy);
+
+                copy       = cross_turn_line_wide;
+                grid[5][3] = std::move(copy);
+
+                copy = line_edge;
+                copy.rotate270();
+                grid[6][3] = std::move(copy);
+
+                copy = cross_turn_line_wide;
+                copy.flip_vertical();
+                copy.flip_horizontal();
+                grid[6][2] = std::move(copy);
+
+                copy = cross_turn_line_wide;
+                copy.flip_vertical();
+                grid[7][2] = std::move(copy);
+
+                copy       = cross_turn_line_wide;
+                grid[7][3] = std::move(copy);
+
+                copy = cross_turn_line_wide;
+                copy.flip_horizontal();
+                grid[8][3] = std::move(copy);
+
+                copy = cross_turn_line_wide;
+                copy.flip_vertical();
+                copy.flip_horizontal();
+                grid[8][2] = std::move(copy);
+
+                copy = line_edge;
+                copy.rotate270();
+                grid[9][3] = std::move(copy);
+
+                copy = s_turn_soft_line_wide;
+                copy.flip_vertical();
+                grid[9][2] = std::move(copy);
+
+                copy = line_edge;
+                copy.rotate270();
+                grid[10][3] = std::move(copy);
+
+                copy = s_turn_soft;
+                copy.flip_horizontal();
+                grid[10][2] = std::move(copy);
+
+                copy        = s_turn_soft;
+                grid[11][2] = std::move(copy);
+
+                copy = s_turn_soft;
+                copy.flip_vertical();
+                grid[11][3] = std::move(copy);
+
+                copy = s_turn_soft_line_wide;
+                copy.flip_vertical();
+                copy.flip_horizontal();
+                grid[12][2] = std::move(copy);
+
+                copy = s_turn_soft_line_wide;
+                copy.flip_horizontal();
+                grid[12][3] = std::move(copy);
+
+                copy = cross_turn_line_wide;
+                copy.flip_vertical();
+                grid[13][2] = std::move(copy);
+
+                copy        = cross_turn_line_wide;
+                grid[13][3] = std::move(copy);
+
+                copy = cross_turn_line_wide;
+                copy.flip_horizontal();
+                grid[14][3] = std::move(copy);
+
+                copy = cross_turn_line_wide;
+                copy.flip_vertical();
+                copy.flip_horizontal();
+                grid[14][2] = std::move(copy);
+
+                copy = s_turn_soft_line_wide;
+                copy.flip_vertical();
+                grid[15][2] = std::move(copy);
+
+                copy        = s_turn_soft_line_wide;
+                grid[15][3] = std::move(copy);
+
+                copy = s_turn_soft;
+                copy.flip_horizontal();
+                grid[16][2] = std::move(copy);
+
+                copy = s_turn_soft;
+                copy.flip_horizontal();
+                copy.flip_vertical();
+                grid[16][3] = std::move(copy);
+
+                copy = line_edge;
+                copy.rotate270();
+                grid[17][3] = std::move(copy);
+
+                copy        = s_turn_soft;
+                grid[17][2] = std::move(copy);
+
+                copy = line_edge;
+                copy.rotate270();
+                copy.flip_horizontal();
+                grid[18][3] = std::move(copy);
+
+                copy = s_turn_soft_line_wide;
+                copy.flip_vertical();
+                copy.flip_horizontal();
+                grid[18][2] = std::move(copy);
+
+                copy = cross_turn_line_wide;
+                copy.flip_vertical();
+                grid[19][2] = std::move(copy);
+
+                copy        = cross_turn_line_wide;
+                grid[19][3] = std::move(copy);
+
+                copy = cross_turn_line_wide;
+                copy.flip_horizontal();
+                grid[20][3] = std::move(copy);
+
+                copy = cross_turn_line_wide;
+                copy.flip_vertical();
+                copy.flip_horizontal();
+                grid[20][2] = std::move(copy);
+
+                copy = s_turn_soft_line_wide;
+                copy.flip_vertical();
+                grid[21][2] = std::move(copy);
+
+                copy        = s_turn_soft_line_wide;
+                grid[21][3] = std::move(copy);
+
+                copy = s_turn_soft;
+                copy.flip_horizontal();
+                grid[22][2] = std::move(copy);
+
+                copy = s_turn_soft;
+                copy.flip_vertical();
+                copy.flip_horizontal();
+                grid[22][3] = std::move(copy);
+
+                copy        = s_turn_soft;
+                grid[23][2] = std::move(copy);
+
+                copy = s_turn_soft;
+                copy.flip_vertical();
+                grid[23][3] = std::move(copy);
+
+                copy = s_turn_soft_line_wide;
+                copy.flip_vertical();
+                copy.flip_horizontal();
+                grid[24][2] = std::move(copy);
+
+                copy = s_turn_soft_line_wide;
+                copy.flip_horizontal();
+                grid[24][3] = std::move(copy);
+
+                copy = line_edge;
+                copy.rotate270();
+                grid[25][3] = std::move(copy);
+
+                copy = line_edge;
+                copy.rotate90();
+                grid[25][2] = std::move(copy);
+
+                copy        = turn_line2_wide;
+                grid[26][3] = std::move(copy);
+
+                copy = turn_line2_wide;
+                copy.flip_vertical();
+                grid[26][2] = std::move(copy);
+
+                copy = line_edge;
+                copy.rotate90();
+                grid[27][2] = std::move(copy);
+
+                copy        = s_turn_half;
+                grid[27][3] = std::move(copy);
+
+                copy = start;
+                copy.rotate270();
+                grid[28][2] = std::move(copy);
+
+                copy = start;
+                copy.rotate90();
+                copy.flip_horizontal();
+                grid[28][1] = std::move(copy);
+
+                copy = balancer;
+                copy.rotate90();
+                grid[28][3] = std::move(copy);
+
+                copy = balancer;
+                copy.rotate270();
+                grid[29][3] = std::move(copy);
+            }
+
+            void build_gates_Q2()
+            {
+                gates.push_back(Gate(192.0f, 192.0f, 'B'));
+                gates.push_back(Gate(320.0f, 128.0f, 'D'));
+                gates.push_back(Gate(448.0f, 128.0f, 'F'));
+                gates.push_back(Gate(448.0f, 256.0f, 'G'));
+                gates.push_back(Gate(576.0f, 128.0f, 'H'));
+                gates.push_back(Gate(704.0f, 192.0f, 'J'));
+                gates.push_back(Gate(832.0f, 128.0f, 'K'));
+                gates.push_back(Gate(832.0f, 256.0f, 'L'));
+                gates.push_back(Gate(960.0f, 128.0f, 'M'));
+                gates.push_back(Gate(1088.0f, 192.0f, 'O'));
+                gates.push_back(Gate(1216.0f, 128.0f, 'P'));
+                gates.push_back(Gate(1216.0f, 256.0f, 'Q'));
+                gates.push_back(Gate(1344.0f, 128.0f, 'R'));
+                gates.push_back(Gate(1344.0f, 256.0f, 'S'));
+                gates.push_back(Gate(1472.0f, 192.0f, 'T'));
+                gates.push_back(Gate(1600.0f, 128.0f, 'U'));
+                gates.push_back(Gate(1600.0f, 256.0f, 'V'));
+            }
+
+            void build_cross_sections_Q2()
+            {
+                cross_sections.push_back(CrossSection(128.0f, 256.0f, 'A'));
+                cross_sections.push_back(CrossSection(256.0f, 256.0f, 'C'));
+                cross_sections.push_back(CrossSection(320.0f, 256.0f, 'E'));
+                cross_sections.push_back(CrossSection(576.0f, 256.0f, 'I'));
+                cross_sections.push_back(CrossSection(960.0f, 256.0f, 'N'));
+                cross_sections.push_back(CrossSection(1664.0f, 128.0f, 'W'));
+                cross_sections.push_back(CrossSection(1664.0f, 256.0f, 'X'));
+                cross_sections.push_back(CrossSection(1792.0f, 128.0f, 'Y'));
+            }
+#endif
         };
 
         class Car

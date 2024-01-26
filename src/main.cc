@@ -30,7 +30,7 @@ int main(int, char **)
     /*===================================================*/
     /*      TODO: INITIALIZE YOUR LOGIC HERE             */
     /*                                                   */
-    jlb::Logic logic{jlb::Direction::STRAIGHT, x_t0, y_t0, theta_t0};
+    jlb::Logic logic;
     logic.set_states({jlb::LabyrinthState::START});
     // logic.set_states({jlb::FastState::OUT_ACCEL_ZONE});
     /*                                                   */
@@ -291,18 +291,29 @@ int main(int, char **)
             sf::Text text;
             text.setFont(font);
             text.setStyle(sf::Text::Bold);
-            text.setString('X');
-            text.setCharacterSize(14);
             text.setFillColor(sf::Color::Black);
+            text.setCharacterSize(14);
+
+#ifndef Q2
+            text.setString('X');
             text.setPosition(96 + 8, 448 + 4);
+#else
+            text.setString('Z');
+            text.setPosition(1792 + 8, 224 + 4);
+#endif
             window.draw(text);
 
             text.setFont(font);
             text.setStyle(sf::Text::Bold);
-            text.setString('Y');
             text.setCharacterSize(14);
             text.setFillColor(sf::Color::Black);
+#ifndef Q2
+            text.setString('Y');
             text.setPosition(96 + 8, 576 + 4);
+#else
+            text.setString('[');
+            text.setPosition(1920 + 8, 224 + 4);
+#endif
             window.draw(text);
 
             for (unsigned long col = 0; col < rsim::env::MAP_WIDTH; col++)
