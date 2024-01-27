@@ -12,7 +12,7 @@
 #define px_to_m(px) (px * (rsim::SQUARE_LENGTH * 2.0f) / rsim::env::BITMAP_SIZE)
 #define m_to_px(m)  (m * rsim::env::BITMAP_SIZE / (rsim::SQUARE_LENGTH * 2.0f))
 
-#define Q2
+// #define Q2
 
 //
 //      END DEFINES
@@ -134,7 +134,7 @@ namespace rsim
     namespace smodel
     {
 
-        PARAM int SENSOR_COUNT = 16;  // -
+        PARAM int SENSOR_COUNT = 24;  // -
 
     }  // namespace smodel
 
@@ -155,8 +155,8 @@ namespace rsim
         PARAM float Ki          = 0.05f;          // -
         PARAM float Kd          = 0.025f;         // -
         PARAM float SPEED       = m_to_px(1.0f);  // px/s
-        PARAM bool  USE_SEED    = true;           // -
-        PARAM int   RANDOM_SEED = 1706273087;     // -
+        PARAM bool  USE_SEED    = false;          // -
+        PARAM int   RANDOM_SEED = 1706388580;     // -
 
     }  // namespace pmodel
 

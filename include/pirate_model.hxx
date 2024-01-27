@@ -279,7 +279,7 @@ namespace rsim
                 this->operator[]('M').add_edge('K', Direction::RIGHT, {'P', 'Q', 'R'}, QUARTER_CIRCLE);
                 this->operator[]('M').add_edge('R', Direction::LEFT, {'H', 'K'}, QUARTER_CIRCLE);
                 // this->operator[]('M').add_edge('Q', Direction::STRAIGHT, {'H', 'K'}, UNIT);
-                this->operator[]('M').add_edge('P', Direction::RIGHT, {'H', 'K'}, QUARTER_CIRCLE);
+                // this->operator[]('M').add_edge('P', Direction::RIGHT, {'H', 'K'}, QUARTER_CIRCLE);
                 this->operator[]('N').add_edge('K', Direction::LEFT, {'R', 'S', 'T'}, QUARTER_CIRCLE);
                 this->operator[]('N').add_edge('I', Direction::STRAIGHT, {'R', 'S', 'T'}, 2.0f * UNIT);
                 this->operator[]('N').add_edge('L', Direction::RIGHT, {'R', 'S', 'T'}, QUARTER_CIRCLE);
@@ -610,12 +610,6 @@ namespace rsim
                         {
                             unsigned long num_neighbors = graph[next_node].edges.size();
                             auto          selected_edge = rand() % num_neighbors;
-
-                            // if (graph[next_node].edges[selected_edge].node == 'P' || graph[next_node].edges[selected_edge].node == 'U' ||
-                            //     graph[next_node].edges[selected_edge].node == 'X')
-                            // {
-                            //     continue;
-                            // }
 
                             auto prev_nodes = graph[next_node].edges[selected_edge].prev_nodes;
                             if (std::find(prev_nodes.begin(), prev_nodes.end(), previous_node) != prev_nodes.end())

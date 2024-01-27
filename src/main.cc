@@ -78,8 +78,6 @@ int main(int, char **)
                 /*                                                   */
                 /*===================================================*/
 
-                simulation.update(wheel_angle, velocity);
-
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));  // 200 Hz
 
                 while (pause_threads) { std::this_thread::sleep_for(std::chrono::milliseconds(100)); }
@@ -93,6 +91,19 @@ int main(int, char **)
             {
                 logic.send_telemetry();
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));  // 10 Hz
+
+                while (pause_threads) { std::this_thread::sleep_for(std::chrono::milliseconds(100)); }
+            }
+        });
+
+    std::thread thread_simulation(
+        [&]()
+        {
+            while (!terminate_threads)
+            {
+                simulation.update(wheel_angle, velocity);
+
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));  // 200 Hz
 
                 while (pause_threads) { std::this_thread::sleep_for(std::chrono::milliseconds(100)); }
             }
@@ -185,6 +196,7 @@ int main(int, char **)
                     terminate_threads = true;
                     thread_control.join();
                     thread_visualization.join();
+                    thread_simulation.join();
 
                     window.close();
 
@@ -390,6 +402,7 @@ int main(int, char **)
     terminate_threads = true;
     thread_control.join();
     thread_visualization.join();
+    thread_simulation.join();
 
     return EXIT_SUCCESS;
 }
