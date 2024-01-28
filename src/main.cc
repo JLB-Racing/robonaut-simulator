@@ -31,7 +31,7 @@ int main(int, char **)
     /*      TODO: INITIALIZE YOUR LOGIC HERE             */
     /*                                                   */
     jlb::Logic logic;
-    logic.set_states({jlb::LabyrinthState::START});
+    // logic.set_states({jlb::LabyrinthState::START});
     // logic.set_states({jlb::FastState::OUT_ACCEL_ZONE});
     /*                                                   */
     /*===================================================*/
@@ -177,12 +177,16 @@ int main(int, char **)
 
         rsim::gui::Button floodButton(
             window, sf::Vector2f(10, 10), sf::Vector2f(100, 25), "     Flood      ", font, 12, sf::Color::Black, sf::Color{200, 200, 200});
+        rsim::gui::Button resetButton(
+            window, sf::Vector2f(10, 45), sf::Vector2f(100, 25), "Reset", font, 12, sf::Color::Black, sf::Color{200, 200, 200});
         rsim::gui::Button safetyCarStartButton(
             window, sf::Vector2f(120, 10), sf::Vector2f(100, 25), "Safety Car start", font, 12, sf::Color::Black, sf::Color{200, 200, 200});
         rsim::gui::Button safetyCarResetButton(
             window, sf::Vector2f(120, 45), sf::Vector2f(100, 25), "Safety Car reset", font, 12, sf::Color::Black, sf::Color{200, 200, 200});
         rsim::gui::Button pauseButton(
             window, sf::Vector2f(230, 10), sf::Vector2f(100, 25), "Pause", font, 12, sf::Color::Black, sf::Color{200, 200, 200});
+        rsim::gui::Button startButton(
+            window, sf::Vector2f(230, 45), sf::Vector2f(100, 25), "Start", font, 12, sf::Color::Black, sf::Color{200, 200, 200});
 
         sf::Vector2f mousePos;
 
@@ -230,6 +234,28 @@ int main(int, char **)
                                 pause_threads = false;
                                 std::cout << "███████████████████ Resume ███████████████████" << std::endl;
                             }
+                        }
+                        if (startButton.isMouseOver())
+                        {
+                            /*===================================================*/
+                            /*      TODO: HANDLE START SEQEUNCE HERE             */
+                            /*                                                   */
+                            logic.start_signal();
+                            /*                                                   */
+                            /*===================================================*/
+                            simulation.start();
+                            std::cout << "███████████████████ Start ███████████████████" << std::endl;
+                        }
+                        if (resetButton.isMouseOver())
+                        {
+                            /*===================================================*/
+                            /*      TODO: HANDLE RESET SEQEUNCE HERE             */
+                            /*                                                   */
+                            logic.reset_signal({jlb::LabyrinthState::START});
+                            /*                                                   */
+                            /*===================================================*/
+                            simulation.reset();
+                            std::cout << "███████████████████ Reset ███████████████████" << std::endl;
                         }
                     }
                 }
@@ -377,9 +403,11 @@ int main(int, char **)
             window.draw(safety_car_sprite);
 
             floodButton.draw();
+            resetButton.draw();
             safetyCarStartButton.draw();
             safetyCarResetButton.draw();
             pauseButton.draw();
+            startButton.draw();
 
             // bottom right corner display mouse position
             sf::Text mousePosText;

@@ -375,12 +375,10 @@ namespace rsim
             float distance_travelled = 0.0f;
             int   section_percentage = 0;
 
+            bool started = false;
+
             PirateController()
             {
-#ifdef Q2
-                previous_node      = 'Y';
-                previous_direction = Direction::STRAIGHT;
-
                 if (USE_SEED) { srand(RANDOM_SEED); }
                 else
                 {
@@ -388,6 +386,17 @@ namespace rsim
                     std::cout << "SEED: " << seed << std::endl;
                     srand(seed);
                 }
+                init();
+            }
+
+            ~PirateController() {}
+
+            void init()
+            {
+#ifdef Q2
+                previous_node      = 'Y';
+                previous_direction = Direction::STRAIGHT;
+
                 next_node            = 'W';
                 next_direction       = Direction::RIGHT;
                 after_next_node      = 'U';
@@ -396,13 +405,6 @@ namespace rsim
                 previous_node      = 'P';
                 previous_direction = Direction::STRAIGHT;
 
-                if (USE_SEED) { srand(RANDOM_SEED); }
-                else
-                {
-                    auto seed = time(NULL);
-                    std::cout << "SEED: " << seed << std::endl;
-                    srand(seed);
-                }
                 if (rand() % 2 == 0)
                 {
                     next_node            = 'Q';
@@ -426,12 +428,29 @@ namespace rsim
                     }
                 }
 #endif
-
+                section_percentage      = 0;
+                distance_travelled      = 0.0f;
+                selected_edge           = 0u;
+                target_angle            = 0.0f;
+                target_speed            = 0.0f;
+                prev_error              = 0.0f;
+                integral                = 0.0f;
+                prev_control_timestamp_ = std::chrono::steady_clock::now();
                 std::cout << previous_node << "->" << next_node << "->" << after_next_node << "[" << next_direction << ", " << after_next_direction
                           << "]" << std::endl;
             }
 
-            ~PirateController() {}
+            void reset()
+            {
+                started = false;
+                init();
+            }
+
+            void start()
+            {
+                started = true;
+                init();
+            }
 
             float PID(const float error, const float dt)
             {
@@ -578,62 +597,66 @@ namespace rsim
 
             PirateInterface update([[maybe_unused]] bool under_gate_, [[maybe_unused]] bool at_cross_section_, [[maybe_unused]] vmodel::State state_)
             {
-                auto                   control_timestamp_ = std::chrono::steady_clock::now();
-                [[maybe_unused]] float dt =
-                    std::chrono::duration_cast<std::chrono::milliseconds>(control_timestamp_ - prev_control_timestamp_).count() / 1000.0f;
-                prev_control_timestamp_ = control_timestamp_;
-
-                bool at_decision_point = under_gate_ || at_cross_section_;
-
-                for (unsigned long i = 0; i < graph[previous_node].edges.size(); i++)
+                if (started)
                 {
-                    if (graph[previous_node].edges[i].node == next_node)
+                    auto                   control_timestamp_ = std::chrono::steady_clock::now();
+                    [[maybe_unused]] float dt =
+                        std::chrono::duration_cast<std::chrono::milliseconds>(control_timestamp_ - prev_control_timestamp_).count() / 1000.0f;
+                    prev_control_timestamp_ = control_timestamp_;
+
+                    bool at_decision_point = under_gate_ || at_cross_section_;
+
+                    for (unsigned long i = 0; i < graph[previous_node].edges.size(); i++)
                     {
-                        selected_edge = i;
-                        break;
-                    }
-                }
-
-                distance_travelled += SPEED * dt;
-
-                if (!prev_at_decision_point && at_decision_point)
-                {
-                    if (std::sqrt(std::pow(graph[next_node].x - state_.x, 2) + std::pow(graph[next_node].y - state_.y, 2)) < 8.0f)
-                    {
-                        previous_node      = next_node;
-                        next_node          = after_next_node;
-                        previous_direction = next_direction;
-                        next_direction     = after_next_direction;
-                        distance_travelled = 0.0f;
-
-                        while (true)
+                        if (graph[previous_node].edges[i].node == next_node)
                         {
-                            unsigned long num_neighbors = graph[next_node].edges.size();
-                            auto          selected_edge = rand() % num_neighbors;
-
-                            auto prev_nodes = graph[next_node].edges[selected_edge].prev_nodes;
-                            if (std::find(prev_nodes.begin(), prev_nodes.end(), previous_node) != prev_nodes.end())
-                            {
-                                after_next_node      = graph[next_node].edges[selected_edge].node;
-                                after_next_direction = graph[next_node].edges[selected_edge].direction;
-                                break;
-                            }
+                            selected_edge = i;
+                            break;
                         }
-
-                        std::cout << previous_node << "->" << next_node << "->" << after_next_node << "[" << next_direction << ", "
-                                  << after_next_direction << "]" << std::endl;
                     }
+
+                    distance_travelled += SPEED * dt;
+
+                    if (!prev_at_decision_point && at_decision_point)
+                    {
+                        if (std::sqrt(std::pow(graph[next_node].x - state_.x, 2) + std::pow(graph[next_node].y - state_.y, 2)) < 8.0f)
+                        {
+                            previous_node      = next_node;
+                            next_node          = after_next_node;
+                            previous_direction = next_direction;
+                            next_direction     = after_next_direction;
+                            distance_travelled = 0.0f;
+
+                            while (true)
+                            {
+                                unsigned long num_neighbors = graph[next_node].edges.size();
+                                auto          selected_edge = rand() % num_neighbors;
+
+                                auto prev_nodes = graph[next_node].edges[selected_edge].prev_nodes;
+                                if (std::find(prev_nodes.begin(), prev_nodes.end(), previous_node) != prev_nodes.end())
+                                {
+                                    after_next_node      = graph[next_node].edges[selected_edge].node;
+                                    after_next_direction = graph[next_node].edges[selected_edge].direction;
+                                    break;
+                                }
+                            }
+
+                            std::cout << previous_node << "->" << next_node << "->" << after_next_node << "[" << next_direction << ", "
+                                      << after_next_direction << "]" << std::endl;
+                        }
+                    }
+
+                    auto distance      = graph[previous_node].edges[selected_edge].distance;
+                    section_percentage = static_cast<int>(distance_travelled / distance * 100.0f);
+
+                    lateral_control(dt);
+                    longitudinal_control(dt);
+
+                    prev_at_decision_point = at_decision_point;
+
+                    return PirateInterface{previous_node, next_node, after_next_node, section_percentage};
                 }
-
-                auto distance      = graph[previous_node].edges[selected_edge].distance;
-                section_percentage = static_cast<int>(distance_travelled / distance * 100.0f);
-
-                lateral_control(dt);
-                longitudinal_control(dt);
-
-                prev_at_decision_point = at_decision_point;
-
-                return PirateInterface{previous_node, next_node, after_next_node, section_percentage};
+                else { return PirateInterface{previous_node, next_node, after_next_node, section_percentage}; }
             }
 
         private:

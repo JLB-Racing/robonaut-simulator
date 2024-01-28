@@ -134,6 +134,20 @@ namespace rsim
             safety_car.update(safety_car_controller.target_angle, safety_car_controller.target_speed);
         }
 
+        void start() { pirate_controller.start(); }
+
+        void reset()
+        {
+            pirate_controller.reset();
+            pirate.state.x           = PIRATE_START_X;
+            pirate.state.y           = PIRATE_START_Y;
+            pirate.state.orientation = PIRATE_START_ORIENTATION;
+
+            car.state.x           = START_X;
+            car.state.y           = START_Y;
+            car.state.orientation = START_ORIENTATION;
+        }
+
     private:
     };
 }  // namespace rsim
