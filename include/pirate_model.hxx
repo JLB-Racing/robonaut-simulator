@@ -192,11 +192,11 @@ namespace rsim
                 // this->operator[]('W').add_edge('Y', Direction::LEFT, {'U'}, 2.0f * UNIT);
                 this->operator[]('X').add_edge('V', Direction::STRAIGHT, {'W', 'Z'}, UNIT);
                 this->operator[]('X').add_edge('W', Direction::LEFT, {'V'}, 2.0f * QUARTER_CIRCLE);
-                this->operator[]('X').add_edge('Z', Direction::RIGHT, {'V'}, 2.8f);
+                // this->operator[]('X').add_edge('Z', Direction::RIGHT, {'V'}, 2.8f);
                 this->operator[]('Y').add_edge('W', Direction::RIGHT, {'Y'}, 2.0f * UNIT);
-                this->operator[]('Z').add_edge('X', Direction::LEFT, {'['}, 2.8f);
-                this->operator[]('Z').add_edge('[', Direction::STRAIGHT, {'X'}, 2.0f * UNIT);
-                this->operator[]('[').add_edge('Z', Direction::STRAIGHT, {'['}, 2.0f * UNIT);
+                // this->operator[]('Z').add_edge('X', Direction::LEFT, {'['}, 2.8f);
+                // this->operator[]('Z').add_edge('[', Direction::STRAIGHT, {'X'}, 2.0f * UNIT);
+                // this->operator[]('[').add_edge('Z', Direction::STRAIGHT, {'['}, 2.0f * UNIT);
 
 #else
                 nodes.push_back(Node{static_cast<char>('A'), 704, 448});
