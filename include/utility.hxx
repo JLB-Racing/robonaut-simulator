@@ -12,7 +12,7 @@
 #define px_to_m(px) (px * (rsim::SQUARE_LENGTH * 2.0f) / rsim::env::BITMAP_SIZE)
 #define m_to_px(m)  (m * rsim::env::BITMAP_SIZE / (rsim::SQUARE_LENGTH * 2.0f))
 
-#define Q2
+// #define Q2
 
 //
 //      END DEFINES
@@ -119,7 +119,10 @@ namespace rsim
 
         PARAM float YAW_RATE_NOISE  = 0.1f;   // rad/s
         PARAM float MOTOR_RPM_NOISE = 20.0f;  // rpm
-    }                                         // namespace vmodel
+
+        // PARAM float YAW_RATE_NOISE  = 0.0f;   // rad/s
+        // PARAM float MOTOR_RPM_NOISE = 0.0f;  // rpm
+    }  // namespace vmodel
 
     //
     //      END VEHICLE MODEL
@@ -155,8 +158,8 @@ namespace rsim
         PARAM float Ki          = 0.05f;          // -
         PARAM float Kd          = 0.025f;         // -
         PARAM float SPEED       = m_to_px(1.0f);  // px/s
-        PARAM bool  USE_SEED    = false;          // -
-        PARAM int   RANDOM_SEED = 1706467019;     // -
+        PARAM bool  USE_SEED    = true;           // -
+        PARAM int   RANDOM_SEED = 1707036673;     // -
 
     }  // namespace pmodel
 
