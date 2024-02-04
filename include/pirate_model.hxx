@@ -115,7 +115,7 @@ namespace rsim
                 const auto CROSS_UNIT      = m_to_px(3.65f);
                 const auto HALF_CROSS_UNIT = m_to_px(2.7f);
 
-                // this->operator[]('A').add_edge('C', Direction::RIGHT, {'A'}, 2.0f * UNIT);
+                this->operator[]('A').add_edge('C', Direction::RIGHT, {'A'}, 2.0f * UNIT);
                 this->operator[]('B').add_edge('C', Direction::LEFT, {'D'}, QUARTER_CIRCLE);
                 this->operator[]('B').add_edge('D', Direction::STRAIGHT, {'C'}, QUARTER_CIRCLE + UNIT);
                 // this->operator[]('C').add_edge('A', Direction::LEFT, {'E'}, 2.0f * UNIT);
@@ -193,7 +193,7 @@ namespace rsim
                 this->operator[]('X').add_edge('V', Direction::STRAIGHT, {'W', 'Z'}, UNIT);
                 this->operator[]('X').add_edge('W', Direction::LEFT, {'V'}, 2.0f * QUARTER_CIRCLE);
                 // this->operator[]('X').add_edge('Z', Direction::RIGHT, {'V'}, 2.8f);
-                this->operator[]('Y').add_edge('W', Direction::RIGHT, {'Y'}, 2.0f * UNIT);
+                // this->operator[]('Y').add_edge('W', Direction::RIGHT, {'Y'}, 2.0f * UNIT);
                 // this->operator[]('Z').add_edge('X', Direction::LEFT, {'['}, 2.8f);
                 // this->operator[]('Z').add_edge('[', Direction::STRAIGHT, {'X'}, 2.0f * UNIT);
                 // this->operator[]('[').add_edge('Z', Direction::STRAIGHT, {'['}, 2.0f * UNIT);
@@ -390,12 +390,12 @@ namespace rsim
             void init()
             {
 #ifdef Q2
-                previous_node      = 'Y';
+                previous_node      = 'A';
                 previous_direction = Direction::STRAIGHT;
 
-                next_node            = 'W';
+                next_node            = 'C';
                 next_direction       = Direction::RIGHT;
-                after_next_node      = 'U';
+                after_next_node      = 'E';
                 after_next_direction = Direction::STRAIGHT;
 #else
                 previous_node      = 'P';
@@ -621,7 +621,7 @@ namespace rsim
 
                     distance_travelled += SPEED * dt;
 
-                    if (!prev_at_decision_point && at_decision_point)
+                    if (/*!prev_at_decision_point && at_decision_point*/ true)
                     {
                         if (std::sqrt(std::pow(graph[next_node].x - state_.x, 2) + std::pow(graph[next_node].y - state_.y, 2)) < 8.0f)
                         {

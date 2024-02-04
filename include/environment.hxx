@@ -923,14 +923,14 @@ namespace rsim
 
             void build_cross_sections_Q2()
             {
-                cross_sections.push_back(CrossSection(128.0f, 256.0f, 'A'));
-                cross_sections.push_back(CrossSection(256.0f, 256.0f, 'C'));
-                cross_sections.push_back(CrossSection(320.0f, 256.0f, 'E'));
-                cross_sections.push_back(CrossSection(576.0f, 256.0f, 'I'));
-                cross_sections.push_back(CrossSection(960.0f, 256.0f, 'N'));
-                cross_sections.push_back(CrossSection(1664.0f, 128.0f, 'W'));
-                cross_sections.push_back(CrossSection(1664.0f, 256.0f, 'X'));
-                cross_sections.push_back(CrossSection(1792.0f, 128.0f, 'Y'));
+                // cross_sections.push_back(CrossSection(128.0f, 256.0f, 'A'));
+                // cross_sections.push_back(CrossSection(256.0f, 256.0f, 'C'));
+                // cross_sections.push_back(CrossSection(320.0f, 256.0f, 'E'));
+                // cross_sections.push_back(CrossSection(576.0f, 256.0f, 'I'));
+                // cross_sections.push_back(CrossSection(960.0f, 256.0f, 'N'));
+                // cross_sections.push_back(CrossSection(1664.0f, 128.0f, 'W'));
+                // cross_sections.push_back(CrossSection(1664.0f, 256.0f, 'X'));
+                // cross_sections.push_back(CrossSection(1792.0f, 128.0f, 'Y'));
             }
 #endif
         };

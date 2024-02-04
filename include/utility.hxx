@@ -38,15 +38,16 @@ namespace rsim
     PARAM float PIRATE_START_Y           = 300.0f;        // px
     PARAM float PIRATE_START_ORIENTATION = M_PI / 2.0f;   // rad
 #else
-    PARAM float START_X                  = 108.0f;   // px
-    PARAM float START_Y                  = 256.0f;   // px
-    PARAM float START_ORIENTATION        = 0.0f;     // rad
+    PARAM float PIRATE_START_X           = 108.0f;   // px
+    PARAM float PIRATE_START_Y           = 256.0f;   // px
+    PARAM float PIRATE_START_ORIENTATION = 0.0f;     // rad
     PARAM float BALANCER_END_CENTER_X    = 1920.0f;  // px
     PARAM float BALANCER_END_CENTER_Y    = 224.0f;   // px
     PARAM float BALANCER_END_RADIUS      = 8.0f;     // px
-    PARAM float PIRATE_START_X           = 1812.0f;  // px
-    PARAM float PIRATE_START_Y           = 128.0f;   // px
-    PARAM float PIRATE_START_ORIENTATION = M_PI;     // rad
+
+    PARAM float START_X           = 1812.0f;  // px
+    PARAM float START_Y           = 128.0f;   // px
+    PARAM float START_ORIENTATION = M_PI;     // rad
 #endif
     PARAM float FAST_START_X                 = 224.0f;       // px
     PARAM float FAST_START_Y                 = 320.0f;       // px
@@ -160,8 +161,8 @@ namespace rsim
         PARAM float Ki          = 0.05f;          // -
         PARAM float Kd          = 0.025f;         // -
         PARAM float SPEED       = m_to_px(1.0f);  // px/s
-        PARAM bool  USE_SEED    = true;           // -
-        PARAM int   RANDOM_SEED = 1707036673;     // -
+        PARAM bool  USE_SEED    = false;          // -
+        PARAM int   RANDOM_SEED = 1707073908;     // -
 
     }  // namespace pmodel
 
