@@ -379,10 +379,10 @@ int main(int, char **)
             /*===================================================*/
             /*      TODO: UPDATE ODOMETRY VISUALIZATION HERE     */
             /*                                myButton                   */
-            auto [vx_t, x_t, y_t, theta_t] = logic.get_odometry();
-            odom_x                         = x_t;
-            odom_y                         = y_t;
-            odom_theta                     = theta_t;
+            [[maybe_unused]] auto [vx_t, x_t, y_t, theta_t, distance_local] = logic.get_odometry();
+            odom_x                                                          = x_t;
+            odom_y                                                          = y_t;
+            odom_theta                                                      = theta_t;
             /*                                                   */
             /*===================================================*/
 

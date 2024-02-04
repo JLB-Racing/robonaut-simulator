@@ -31,7 +31,12 @@ namespace rsim
 
                 // Limit the input values to their maximums
                 wheel_angle = std::max(-MAX_WHEEL_ANGLE, std::min(MAX_WHEEL_ANGLE, wheel_angle_in));
-                velocity    = std::max(-MAX_VELOCITY, std::min(MAX_VELOCITY, velocity_in));
+
+                // check velocity for max acceleration and max deceleration
+                if (velocity_in > velocity) { velocity = std::min(velocity + MAX_ACCELERATION * dt, velocity_in); }
+                else { velocity = std::max(velocity - MAX_DECELERATION * dt, velocity_in); }
+
+                velocity = std::max(-MAX_VELOCITY, std::min(MAX_VELOCITY, velocity));
 
                 // Calculate the new orientation and position
                 float delta_s     = velocity * dt;
@@ -112,9 +117,11 @@ namespace rsim
 
         //         xi = sqrt(pow(mu * m * g * lr / (lf + lr), 2) - pow(Fx_t, 2)) / (mu * m * g * lr / (lf + lr));
 
-        //         FyF_t = -D_front * sinf(C_front * atanf(B_front * ((1 - E_front) * (alphaF_t_deg + Sh_front) + (E_front / B_front) * atanf(B_front * (alphaF_t_deg + Sh_front))))) + Sv_front;
+        //         FyF_t = -D_front * sinf(C_front * atanf(B_front * ((1 - E_front) * (alphaF_t_deg + Sh_front) + (E_front / B_front) * atanf(B_front
+        //         * (alphaF_t_deg + Sh_front))))) + Sv_front;
 
-        //         FyR_t = -(D_rear * xi) * sinf(C_rear * atanf(B_rear * ((1 - E_rear) * (alphaR_t_deg + Sh_rear) + (E_rear / B_rear) * atanf(B_rear * (alphaR_t_deg + Sh_rear))))) + Sv_rear;
+        //         FyR_t = -(D_rear * xi) * sinf(C_rear * atanf(B_rear * ((1 - E_rear) * (alphaR_t_deg + Sh_rear) + (E_rear / B_rear) * atanf(B_rear *
+        //         (alphaR_t_deg + Sh_rear))))) + Sv_rear;
         //     }
         // };
 
@@ -163,7 +170,10 @@ namespace rsim
 
             float previous_wheel_angle = 0.0f;
 
-            DynamicBicycleModel(float x_, float y_, float orientation_) : x_t(x_), y_t(y_), orientation_t(orientation_), x_integrator(x_t), y_integrator(y_t), orientation_integrator(orientation_t) {}
+            DynamicBicycleModel(float x_, float y_, float orientation_)
+                : x_t(x_), y_t(y_), orientation_t(orientation_), x_integrator(x_t), y_integrator(y_t), orientation_integrator(orientation_t)
+            {
+            }
 
             void tire_slip_calculation([[maybe_unused]] const float delta_t)
             {

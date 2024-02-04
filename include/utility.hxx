@@ -12,7 +12,7 @@
 #define px_to_m(px) (px * (rsim::SQUARE_LENGTH * 2.0f) / rsim::env::BITMAP_SIZE)
 #define m_to_px(m)  (m * rsim::env::BITMAP_SIZE / (rsim::SQUARE_LENGTH * 2.0f))
 
-// #define Q2
+#define Q2
 
 //
 //      END DEFINES
@@ -110,9 +110,11 @@ namespace rsim
         PARAM float Cm2 = 2.0152f;
         PARAM float Cm3 = 0.4328f;
 
-        PARAM float MAX_WHEEL_ANGLE = 0.5f;    // rad
-        PARAM float MAX_VELOCITY    = 500.0f;  // px/s
-        PARAM float WHEELBASE       = 16.0f;   // px
+        PARAM float MAX_WHEEL_ANGLE  = 0.5f;    // rad
+        PARAM float MAX_VELOCITY     = 500.0f;  // px/s
+        PARAM float WHEELBASE        = 16.0f;   // px
+        PARAM float MAX_ACCELERATION = 128.0f;  // px/s^2
+        PARAM float MAX_DECELERATION = 128.0f;  // px/s^2
 
         PARAM float WHEEL_DIAMETER            = 1.0f;                              // px
         PARAM float GEAR_RATIO_MOTOR_TO_WHEEL = static_cast<float>(3 / 2) * 1.0f;  // -
