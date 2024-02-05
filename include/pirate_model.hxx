@@ -5,8 +5,12 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <sstream>
+#include <iomanip>
 
 #include "utility.hxx"
+
+#include "serialib/serialib.h"
 
 namespace rsim
 {
@@ -372,6 +376,9 @@ namespace rsim
             int   section_percentage = 0;
 
             bool started = false;
+            bool flood   = false;
+
+            serialib serial;
 
             PirateController()
             {
@@ -383,9 +390,20 @@ namespace rsim
                     srand(seed);
                 }
                 init();
+
+                // uint8_t data[5] = {'1', '2', '3', '\r', '\n'};
+
+                char errorOpening = serial.openDevice(SERIAL_PORT, 115200);
+
+                // If connection fails, return the error code otherwise, display a success message
+                if (errorOpening == 1) { printf("Successful connection to %s\n", SERIAL_PORT); }
+                else { printf("Error while opening %s\n", SERIAL_PORT); }
             }
 
-            ~PirateController() {}
+            ~PirateController()
+            {  // Close the serial device
+                serial.closeDevice();
+            }
 
             void init()
             {
@@ -432,6 +450,7 @@ namespace rsim
                     }
                 }
 #endif
+                flood                   = false;
                 section_percentage      = 0;
                 distance_travelled      = 0.0f;
                 selected_edge           = 0u;
@@ -475,6 +494,8 @@ namespace rsim
                 for (unsigned long i = 0; i < smodel::SENSOR_COUNT; i++) detection_rear[i] = detection_rear_[i];
                 line_positions_rear = line_positions_rear_;
             }
+
+            void set_flood(bool flood_) { flood = flood_; }
 
             float select_control_point(std::vector<float> line_positions, float prev_line_position)
             {
@@ -653,17 +674,36 @@ namespace rsim
                     auto distance      = graph[previous_node].edges[selected_edge].distance;
                     section_percentage = static_cast<int>(distance_travelled / distance * 100.0f);
 
+                    if (section_percentage > 100) { section_percentage = 100; }
+                    if (section_percentage < 0) { section_percentage = 0; }
+
                     lateral_control(dt);
                     longitudinal_control(dt);
 
                     prev_at_decision_point = at_decision_point;
+
+#ifdef SEND_RADIO
+                    std::stringstream ss;
+                    ss << std::setw(3) << std::setfill('0') << section_percentage;
+                    std::string data;
+                    if (flood)
+                    {
+                        data += 'F';
+                        data += '-';
+                    }
+                    data += previous_node;
+                    data += next_node;
+                    data += after_next_node;
+                    data += ss.str();
+                    data += '\r';
+                    serial.writeString(data.c_str());
+#endif
 
                     return PirateInterface{previous_node, next_node, after_next_node, section_percentage};
                 }
                 else { return PirateInterface{previous_node, next_node, after_next_node, section_percentage}; }
             }
 
-        private:
             float integral               = 0.0f;
             float prev_error             = 0.0f;
             bool  prev_at_decision_point = false;

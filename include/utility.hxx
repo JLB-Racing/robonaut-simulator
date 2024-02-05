@@ -8,9 +8,21 @@
 //      DEFINES
 //
 
+#define SEND_RADIO
+
 #define PARAM       static constexpr
 #define px_to_m(px) (px * (rsim::SQUARE_LENGTH * 2.0f) / rsim::env::BITMAP_SIZE)
 #define m_to_px(m)  (m * rsim::env::BITMAP_SIZE / (rsim::SQUARE_LENGTH * 2.0f))
+
+#if defined(_WIN32) || defined(_WIN64)
+// for serial ports above "COM9", we must use this extended syntax of "\\.\COMx".
+// also works for COM0 to COM9.
+// https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea?redirectedfrom=MSDN#communications-resources
+#define SERIAL_PORT "\\\\.\\COM1"
+#endif
+#if defined(__linux__) || defined(__APPLE__)
+#define SERIAL_PORT "/dev/ttyACM0"
+#endif
 
 #define Q2
 

@@ -128,6 +128,7 @@ namespace rsim
             pirate_controller.set_detection_rear(detection_rear, line_positions_rear);
             pirate_interface = pirate_controller.update(pirate_under_gate, pirate_at_cross_section, pirate.state);
             pirate.update(pirate_controller.target_angle, pirate_controller.target_speed);
+            pirate_controller.set_flood(flood);
 
             safety_car.detect_front(map.data);
             safety_car_controller.update(safety_car.line_sensor_front.get_detection());

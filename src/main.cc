@@ -216,11 +216,17 @@ int main(int, char **)
                     {
                         if (floodButton.isMouseOver())
                         {
+#ifdef SEND_RADIO
+                            simulation.flood = !simulation.flood;
+                            std::cout << "███████████████████ Flood ███████████████████" << std::endl;
+
+#else
                             if (!simulation.flood)
                             {
                                 simulation.flood = true;
                                 std::cout << "███████████████████ Flood ███████████████████" << std::endl;
                             }
+#endif
                         }
                         if (pauseButton.isMouseOver())
                         {
@@ -237,6 +243,16 @@ int main(int, char **)
                         }
                         if (startButton.isMouseOver())
                         {
+#ifdef SEND_RADIO
+                            simulation.pirate_controller.serial.writeString("START\r");
+                            // sleep 5 seconds
+                            for (int i = 5; i >= 0; i--)
+                            {
+                                std::cout << "███████████████████ " << i << " ███████████████████" << std::endl;
+                                std::this_thread::sleep_for(std::chrono::seconds(1));
+                            }
+#endif
+
                             /*===================================================*/
                             /*      TODO: HANDLE START SEQEUNCE HERE             */
                             /*                                                   */
