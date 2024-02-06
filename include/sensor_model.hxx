@@ -48,14 +48,17 @@ namespace rsim
                 // Calculate the points along the sensor's line
                 for (int i = 0; i < SENSOR_COUNT; i++)
                 {
-                    unsigned long x = static_cast<unsigned long>(state.x) + offset * std::cos(state.orientation) + (i - SENSOR_COUNT / 2) * std::cos(state.orientation + M_PI / 2.0f);
-                    unsigned long y = static_cast<unsigned long>(state.y) + offset * std::sin(state.orientation) + (i - SENSOR_COUNT / 2) * std::sin(state.orientation + M_PI / 2.0f);
+                    unsigned long x = static_cast<unsigned long>(state.x) + offset * std::cos(state.orientation) +
+                                      (i - SENSOR_COUNT / 2) * std::cos(state.orientation + M_PI / 2.0f);
+                    unsigned long y = static_cast<unsigned long>(state.y) + offset * std::sin(state.orientation) +
+                                      (i - SENSOR_COUNT / 2) * std::sin(state.orientation + M_PI / 2.0f);
 
                     // Check if the point is within the map bounds
                     if (x >= 0 && x < cols && y >= 0 && y < rows) { detection[i] = map[x][y]; }
                 }
 
-                // iterate over the detection array to find clusters of detected points and calculate their center of mass relative to the center of the sensor
+                // iterate over the detection array to find clusters of detected points and calculate their center of mass relative to the center of
+                // the sensor
 
                 unsigned long cluster_start = SENSOR_COUNT + 1;
                 unsigned long cluster_end   = SENSOR_COUNT + 1;
@@ -105,9 +108,20 @@ namespace rsim
 
             void update(const vmodel::State &state_) { state = state_; }
 
+            inline float rad2deg(float rad) { return rad * 180.0f / M_PI; }
+            inline float deg2rad(float deg) { return deg * M_PI / 180.0f; }
+
             float detect(const vmodel::State &object_)
             {
-                float distance = std::sqrt(std::pow(object_.x - state.x, 2) + std::pow(object_.y - state.y, 2));
+                float object_angle = std::atan2(object_.y - state.y, object_.x - state.x);
+                float angle_diff   = object_angle - state.orientation;
+                float fov          = deg2rad(180.0f);
+                float distance;
+                if (std::fabs(angle_diff) < fov / 2.0f || std::fabs(angle_diff) > 2.0f * M_PI - fov / 2.0f)
+                {
+                    distance = std::sqrt(std::pow(object_.x - state.x, 2) + std::pow(object_.y - state.y, 2));
+                }
+                else { distance = 1000.0f; }
                 return distance;
             }
 

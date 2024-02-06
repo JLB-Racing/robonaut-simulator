@@ -23,6 +23,7 @@ namespace rsim
         bool                    car_under_gate       = false;
         bool                    car_at_cross_section = false;
         bool                    flood                = false;
+        bool                    safety_car_reset     = false;
         pmodel::PirateInterface pirate_interface;
 
         Simulation(const float x_t_ = START_X, const float y_t_ = START_Y, const float theta_t_ = START_ORIENTATION)
@@ -39,9 +40,18 @@ namespace rsim
             bool pirate_under_gate       = false;
             bool pirate_at_cross_section = false;
 
-            if (std::sqrt(std::pow(BALANCER_END_CENTER_X - car.state.x, 2) + std::pow(BALANCER_END_CENTER_Y - car.state.y, 2)) < BALANCER_END_RADIUS)
+            // #ifndef SEND_RADIO
+            //             if (std::sqrt(std::pow(BALANCER_END_CENTER_X - car.state.x, 2) + std::pow(BALANCER_END_CENTER_Y - car.state.y, 2)) <
+            //             BALANCER_END_RADIUS)
+            //             {
+            //                 flood = false;
+            //             }
+            // #endif
+
+            if (safety_car_reset)
             {
-                flood = false;
+                safety_car.state.x = 64;
+                safety_car.state.y = 256;
             }
 
             for (auto &gate : map.gates)
@@ -120,7 +130,9 @@ namespace rsim
                 }
             }
 
+#ifndef SEND_RADIO
             car.update(target_angle, m_to_px(target_speed));
+#endif
 
             [[maybe_unused]] auto [detection_front, line_positions_front] = pirate.detect_front(map.data);
             [[maybe_unused]] auto [detection_rear, line_positions_rear]   = pirate.detect_rear(map.data);

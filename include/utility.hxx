@@ -8,23 +8,12 @@
 //      DEFINES
 //
 
-#define SEND_RADIO
+// #define SEND_RADIO
+// #define Q2
 
 #define PARAM       static constexpr
 #define px_to_m(px) (px * (rsim::SQUARE_LENGTH * 2.0f) / rsim::env::BITMAP_SIZE)
 #define m_to_px(m)  (m * rsim::env::BITMAP_SIZE / (rsim::SQUARE_LENGTH * 2.0f))
-
-#if defined(_WIN32) || defined(_WIN64)
-// for serial ports above "COM9", we must use this extended syntax of "\\.\COMx".
-// also works for COM0 to COM9.
-// https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea?redirectedfrom=MSDN#communications-resources
-#define SERIAL_PORT "\\\\.\\COM1"
-#endif
-#if defined(__linux__) || defined(__APPLE__)
-#define SERIAL_PORT "/dev/ttyACM0"
-#endif
-
-#define Q2
 
 //
 //      END DEFINES
@@ -38,7 +27,9 @@ namespace rsim
     //      SIMULATION
     //
 
-    PARAM bool RUN_HEADLESS = false;  // -
+    PARAM bool        RUN_HEADLESS = false;  // -
+    PARAM const char* SERIAL_PORT  = "/dev/ttyACM0";
+
 #ifndef Q2
     PARAM float START_X                  = 320.0f;        // px
     PARAM float START_Y                  = 724.0f;        // px
@@ -62,10 +53,10 @@ namespace rsim
     PARAM float START_ORIENTATION = M_PI;     // rad
 #endif
     PARAM float FAST_START_X                 = 224.0f;       // px
-    PARAM float FAST_START_Y                 = 320.0f;       // px
+    PARAM float FAST_START_Y                 = 500.0f;       // px
     PARAM float FAST_START_ORIENTATION       = M_PI / 2.0f;  // rad
     PARAM float SAFETY_CAR_START_X           = 224.0f;       // px
-    PARAM float SAFETY_CAR_START_Y           = 448.0f;       // px
+    PARAM float SAFETY_CAR_START_Y           = 610.0f;       // px
     PARAM float SAFETY_CAR_START_ORIENTATION = M_PI / 2.0f;  // rad
 
     PARAM float SQUARE_LENGTH = 0.6f;  // m
@@ -123,11 +114,11 @@ namespace rsim
         PARAM float Cm2 = 2.0152f;
         PARAM float Cm3 = 0.4328f;
 
-        PARAM float MAX_WHEEL_ANGLE  = 0.5f;    // rad
-        PARAM float MAX_VELOCITY     = 500.0f;  // px/s
-        PARAM float WHEELBASE        = 16.0f;   // px
-        PARAM float MAX_ACCELERATION = 128.0f;  // px/s^2
-        PARAM float MAX_DECELERATION = 128.0f;  // px/s^2
+        PARAM float MAX_WHEEL_ANGLE  = 0.5f;      // rad
+        PARAM float MAX_VELOCITY     = 500.0f;    // px/s
+        PARAM float WHEELBASE        = 16.0f;     // px
+        PARAM float MAX_ACCELERATION = 25600.0f;  // px/s^2
+        PARAM float MAX_DECELERATION = 25600.0f;  // px/s^2
 
         PARAM float WHEEL_DIAMETER            = 1.0f;                              // px
         PARAM float GEAR_RATIO_MOTOR_TO_WHEEL = static_cast<float>(3 / 2) * 1.0f;  // -
@@ -172,9 +163,9 @@ namespace rsim
         PARAM float Kp          = 10.0f;          // -
         PARAM float Ki          = 0.05f;          // -
         PARAM float Kd          = 0.025f;         // -
-        PARAM float SPEED       = m_to_px(1.0f);  // px/s
+        PARAM float SPEED       = m_to_px(0.5f);  // px/s
         PARAM bool  USE_SEED    = false;          // -
-        PARAM int   RANDOM_SEED = 1707073908;     // -
+        PARAM int   RANDOM_SEED = 1707151955;     // -
 
     }  // namespace pmodel
 
@@ -191,10 +182,10 @@ namespace rsim
     namespace scmodel
     {
 
-        PARAM float Kp    = 10.0f;   // -10
-        PARAM float Ki    = 0.05f;   // -
-        PARAM float Kd    = 0.025f;  // -
-        PARAM float SPEED = 50.0f;   // px/s
+        PARAM float Kp    = 10.0f;          // -10
+        PARAM float Ki    = 0.05f;          // -
+        PARAM float Kd    = 0.025f;         // -
+        PARAM float SPEED = m_to_px(1.5f);  // px/s
 
     }  // namespace scmodel
 

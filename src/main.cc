@@ -17,15 +17,15 @@ int main(int, char **)
     float wheel_angle = 0.0f;
     float velocity    = 0.0f;
 
-    rsim::Simulation      simulation{rsim::START_X, rsim::START_Y, rsim::START_ORIENTATION};
-    [[maybe_unused]] auto x_t0     = px_to_m(rsim::START_X);
-    [[maybe_unused]] auto y_t0     = px_to_m(rsim::START_Y);
-    [[maybe_unused]] auto theta_t0 = rsim::START_ORIENTATION;
+    // rsim::Simulation      simulation{rsim::START_X, rsim::START_Y, rsim::START_ORIENTATION};
+    // [[maybe_unused]] auto x_t0     = px_to_m(rsim::START_X);
+    // [[maybe_unused]] auto y_t0     = px_to_m(rsim::START_Y);
+    // [[maybe_unused]] auto theta_t0 = rsim::START_ORIENTATION;
 
-    // rsim::Simulation      simulation{rsim::FAST_START_X, rsim::FAST_START_Y, rsim::FAST_START_ORIENTATION};
-    // [[maybe_unused]] auto x_t0     = px_to_m(rsim::FAST_START_X);
-    // [[maybe_unused]] auto y_t0     = px_to_m(rsim::FAST_START_Y);
-    // [[maybe_unused]] auto theta_t0 = rsim::FAST_START_ORIENTATION;
+    rsim::Simulation      simulation{rsim::FAST_START_X, rsim::FAST_START_Y, rsim::FAST_START_ORIENTATION};
+    [[maybe_unused]] auto x_t0     = px_to_m(rsim::FAST_START_X);
+    [[maybe_unused]] auto y_t0     = px_to_m(rsim::FAST_START_Y);
+    [[maybe_unused]] auto theta_t0 = rsim::FAST_START_ORIENTATION;
 
     /*===================================================*/
     /*      TODO: INITIALIZE YOUR LOGIC HERE             */
@@ -66,6 +66,16 @@ int main(int, char **)
                 logic.imu_callback(0.0f, 0.0f, yaw_rate, 0.0f, 0.0f, 0.0f);
                 logic.rpm_callback(motor_rpm);
                 logic.pirate_callback(prev_node, next_node, after_next_node, section_percentage);
+
+                Measurements measurements;
+                measurements.duty_cycle         = 0.0f;
+                measurements.motor_current      = 0.0f;
+                measurements.object_range       = safety_car_range;
+                measurements.wheel_rpm          = motor_rpm;
+                measurements.lv_battery_voltage = 0.0f;
+                measurements.hv_battery_voltage = 0.0f;
+                logic.set_measurements(measurements);
+
                 /*                                                   */
                 /*===================================================*/
 
@@ -77,6 +87,8 @@ int main(int, char **)
                 velocity                          = target_speed;
                 /*                                                   */
                 /*===================================================*/
+
+                simulation.update(wheel_angle, velocity);
 
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));  // 200 Hz
 
@@ -96,18 +108,17 @@ int main(int, char **)
             }
         });
 
-    std::thread thread_simulation(
-        [&]()
-        {
-            while (!terminate_threads)
-            {
-                simulation.update(wheel_angle, velocity);
+    // std::thread thread_simulation(
+    //     [&]()
+    //     {
+    //         while (!terminate_threads)
+    //         {
 
-                std::this_thread::sleep_for(std::chrono::milliseconds(5));  // 200 Hz
+    //             std::this_thread::sleep_for(std::chrono::milliseconds(5));  // 200 Hz
 
-                while (pause_threads) { std::this_thread::sleep_for(std::chrono::milliseconds(100)); }
-            }
-        });
+    //             while (pause_threads) { std::this_thread::sleep_for(std::chrono::milliseconds(100)); }
+    //         }
+    //     });
 
     ///////////////////////////////////////////////////////////////////////////
     //
@@ -200,7 +211,7 @@ int main(int, char **)
                     terminate_threads = true;
                     thread_control.join();
                     thread_visualization.join();
-                    thread_simulation.join();
+                    // thread_simulation.join();
 
                     window.close();
 
@@ -216,17 +227,8 @@ int main(int, char **)
                     {
                         if (floodButton.isMouseOver())
                         {
-#ifdef SEND_RADIO
                             simulation.flood = !simulation.flood;
                             std::cout << "███████████████████ Flood ███████████████████" << std::endl;
-
-#else
-                            if (!simulation.flood)
-                            {
-                                simulation.flood = true;
-                                std::cout << "███████████████████ Flood ███████████████████" << std::endl;
-                            }
-#endif
                         }
                         if (pauseButton.isMouseOver())
                         {
@@ -273,11 +275,39 @@ int main(int, char **)
                             simulation.reset();
                             std::cout << "███████████████████ Reset ███████████████████" << std::endl;
                         }
+                        if (safetyCarStartButton.isMouseOver())
+                        {
+                            simulation.safety_car_controller.started = true;
+                            std::cout << "███████████████████ Safety Car Start ███████████████████" << std::endl;
+                        }
+                        if (safetyCarResetButton.isMouseOver())
+                        {
+                            simulation.safety_car_reset              = true;
+                            simulation.safety_car_controller.started = false;
+                            std::cout << "███████████████████ Safety Car Reset ███████████████████" << std::endl;
+                        }
                     }
                 }
             }
 
             window.clear(sf::Color::White);
+
+            // draw a grid of 64x64
+            for (unsigned long col = 0; col < rsim::env::MAP_WIDTH; col += 64)
+            {
+                for (unsigned long row = 0; row < rsim::env::MAP_HEIGHT; row += 64)
+                {
+                    sf::RectangleShape rectangle_vert(sf::Vector2f(1, 64));
+                    rectangle_vert.setPosition(col, row);
+                    rectangle_vert.setFillColor(sf::Color(200, 200, 200));
+                    window.draw(rectangle_vert);
+
+                    sf::RectangleShape rectangle_hor(sf::Vector2f(64, 1));
+                    rectangle_hor.setPosition(col, row);
+                    rectangle_hor.setFillColor(sf::Color(200, 200, 200));
+                    window.draw(rectangle_hor);
+                }
+            }
 
             /*===================================================*/
             /*      GATES                                       */
@@ -446,7 +476,7 @@ int main(int, char **)
     terminate_threads = true;
     thread_control.join();
     thread_visualization.join();
-    thread_simulation.join();
+    // thread_simulation.join();
 
     return EXIT_SUCCESS;
 }

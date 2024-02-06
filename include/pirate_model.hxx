@@ -378,7 +378,9 @@ namespace rsim
             bool started = false;
             bool flood   = false;
 
+#ifdef SEND_RADIO
             serialib serial;
+#endif
 
             PirateController()
             {
@@ -391,18 +393,20 @@ namespace rsim
                 }
                 init();
 
-                // uint8_t data[5] = {'1', '2', '3', '\r', '\n'};
-
+#ifdef SEND_RADIO
                 char errorOpening = serial.openDevice(SERIAL_PORT, 115200);
 
                 // If connection fails, return the error code otherwise, display a success message
                 if (errorOpening == 1) { printf("Successful connection to %s\n", SERIAL_PORT); }
                 else { printf("Error while opening %s\n", SERIAL_PORT); }
+#endif
             }
 
             ~PirateController()
-            {  // Close the serial device
+            {
+#ifdef SEND_RADIO
                 serial.closeDevice();
+#endif
             }
 
             void init()
